@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="en" data-track="core">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux command-line essentials — Cybersecurity Academy</title>
+<meta name="description" content="Act 1 Level 2: shell, filesystem, permissions, find, pipes, processes — interactive bash missions.">
+<style>
+/* ===========================================================================
+   1. TOKENS
+   =========================================================================== */
+:root{
+  --bg:#08080a;--bg-soft:#0d0d10;--panel:#121216;--panel-2:#17171c;--panel-3:#1d1d23;
+  --line:#232329;--line-soft:#1a1a1f;
+  --ink:#ecedf0;--ink-dim:#a8a9b2;--ink-faint:#71727c;
+  --accent:#f5b942;--accent-ink:#08080a;
+  --ok:#5fd68a;--warn:#ffb347;--danger:#ff6b57;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --r:12px;--maxw:820px;
+}
+[data-track="core"]     {--accent:#f5b942}
+[data-track="offense"]  {--accent:#ff6a45}
+[data-track="defense"]  {--accent:#4aa3ff}
+[data-track="grc"]      {--accent:#2fd6b4}
+[data-track="ai"]       {--accent:#b183ff}
+[data-track="bounty"]   {--accent:#6fdc8c}
+[data-track="freelance"]{--accent:#ff7ab6}
+[data-track="career"]   {--accent:#8b95ff}
+
+/* ===========================================================================
+   2. BASE
+   =========================================================================== */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);
+  -webkit-font-smoothing:antialiased;overflow-wrap:break-word}
+body::before{content:"";position:fixed;inset:0 0 auto 0;height:300px;pointer-events:none;z-index:0;
+  background:radial-gradient(110% 300px at 50% -70px,color-mix(in srgb,var(--accent) 14%,transparent),transparent 72%)}
+.wrap{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:0 16px 120px}
+@media(min-width:600px){.wrap{padding:0 20px 120px}}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+h1,h2,h3,h4{line-height:1.18;margin:0;font-weight:680;letter-spacing:-.02em}
+p{margin:0 0 12px}p:last-child{margin-bottom:0}
+strong{color:#fff;font-weight:650}
+button{font:inherit;color:inherit}
+::selection{background:var(--accent);color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+[hidden]{display:none!important}
+
+/* ===========================================================================
+   3. TOP BAR + STEP RAIL
+   =========================================================================== */
+.pbar{position:fixed;top:0;left:0;right:0;z-index:60;height:3px;background:var(--line-soft)}
+.pbar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s ease}
+.rail{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line-soft);margin:0 -16px 22px;padding:11px 16px}
+@media(min-width:600px){.rail{margin:0 -20px 22px;padding:11px 20px}}
+.rail .in{display:flex;align-items:center;gap:12px;max-width:calc(var(--maxw) - 32px);margin:0 auto}
+.rail .ct{font:11px/1 var(--mono);letter-spacing:.08em;color:var(--ink-faint);white-space:nowrap}
+.rail .ct b{color:var(--ink)}
+.dots{display:flex;gap:5px;flex:1;min-width:0}
+.dot{flex:1;height:5px;min-width:10px;border-radius:99px;background:var(--line);border:0;padding:0;
+  cursor:pointer;transition:background .2s}
+.dot:hover{background:var(--panel-3)}
+.dot[data-state="active"]{background:var(--accent)}
+.dot[data-state="done"]{background:color-mix(in srgb,var(--ok) 70%,transparent)}
+.rail .home{font:11px/1 var(--mono);color:var(--ink-faint);white-space:nowrap}
+
+/* ===========================================================================
+   4. HEADER
+   =========================================================================== */
+header.page{padding:8px 0 0}
+.crumb{font:12px/1.4 var(--mono);color:var(--ink-faint);letter-spacing:.05em;margin:0 0 16px}
+.crumb b{color:var(--accent);font-weight:500}
+h1.title{font-size:clamp(27px,6.4vw,42px);margin:0 0 14px}
+.lede{font-size:clamp(15.5px,2.2vw,17.5px);color:var(--ink-dim);max-width:58ch;margin:0 0 18px}
+.lede strong{color:var(--ink)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.oc{font:10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;padding:6px 9px;border-radius:99px;
+  border:1px solid color-mix(in srgb,var(--accent) 42%,var(--line));
+  background:color-mix(in srgb,var(--accent) 11%,transparent);
+  color:color-mix(in srgb,var(--accent) 80%,#fff);white-space:nowrap}
+.tag{font:11px/1 var(--mono);color:var(--ink-dim);border:1px solid var(--line);border-radius:7px;
+  padding:6px 8px;background:var(--bg-soft);white-space:nowrap}
+
+/* ===========================================================================
+   5. THE PATH (overview, shown on the intro screen only)
+   =========================================================================== */
+.slabel{display:flex;align-items:center;gap:11px;font:10.5px/1 var(--mono);letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-faint);margin:34px 0 16px}
+.slabel::after{content:"";flex:1;height:1px;background:var(--line)}
+.plist{display:grid;gap:8px;margin:0;padding:0;list-style:none;counter-reset:p}
+.pitem{counter-increment:p;display:flex;gap:12px;align-items:center;text-align:left;width:100%;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 13px;cursor:pointer}
+.pitem:hover{background:var(--panel-2);border-color:color-mix(in srgb,var(--accent) 34%,var(--line))}
+.pitem::before{content:counter(p,decimal-leading-zero);flex:none;width:27px;height:27px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font:11px/1 var(--mono);color:var(--ink-dim);
+  background:var(--bg-soft);border:1px solid var(--line)}
+.pitem.done::before{content:"✓";background:var(--ok);border-color:var(--ok);color:var(--accent-ink)}
+.pitem .t{font-weight:640;font-size:15.5px;display:block}
+.pitem .d{color:var(--ink-faint);font-size:13.5px;display:block;margin-top:2px}
+.pitem .go{margin-left:auto;color:var(--ink-faint);font:13px/1 var(--mono);flex:none}
+
+/* ===========================================================================
+   6. LESSON CARD
+   =========================================================================== */
+.lesson{animation:in .22s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.lhead{display:flex;gap:12px;align-items:flex-start;margin:6px 0 20px}
+.lhead .n{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font:12px/1 var(--mono);background:var(--accent);color:var(--accent-ink);font-weight:600}
+.lhead h2{font-size:clamp(21px,4.6vw,27px);margin:2px 0 0}
+.lhead .k{font:10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+  display:block;margin-bottom:7px}
+
+.blk{margin:0 0 22px}
+.blk>h3{font:10.5px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);
+  margin:0 0 11px;display:flex;align-items:center;gap:8px}
+.blk>h3::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none}
+.blk.lab>h3::before{background:var(--ok)}
+.blk.check>h3::before{background:var(--warn)}
+.blk p{color:var(--ink-dim)}
+.blk p strong{color:var(--ink)}
+
+/* ===========================================================================
+   7. NAV (bottom)
+   =========================================================================== */
+.lnav{position:sticky;bottom:0;z-index:45;display:flex;gap:9px;align-items:center;
+  margin:26px -16px 0;padding:12px 16px;
+  background:color-mix(in srgb,var(--bg) 90%,transparent);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line-soft)}
+@media(min-width:600px){.lnav{margin:26px -20px 0;padding:14px 20px}}
+.lnav .in{display:flex;gap:9px;align-items:center;width:100%;max-width:calc(var(--maxw) - 32px);margin:0 auto}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:9px;padding:12px 16px;cursor:pointer;
+  border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:14.5px;font-weight:600;
+  white-space:nowrap}
+.btn:hover{background:var(--panel-2);border-color:var(--ink-faint)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{filter:brightness(1.08);background:var(--accent)}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.35;cursor:not-allowed}
+.btn.wide{flex:1;justify-content:center}
+.lnav .sp{flex:1}
+
+/* ===========================================================================
+   8. CODE + TERMINAL
+   =========================================================================== */
+pre.code{position:relative;margin:0 0 14px;padding:33px 13px 13px;background:#050507;
+  border:1px solid var(--line);border-radius:10px;overflow-x:auto;font:12.8px/1.62 var(--mono);
+  color:#d6d7dd;-webkit-overflow-scrolling:touch}
+pre.code::before{content:attr(data-lang);position:absolute;top:0;left:0;right:0;padding:7px 11px;
+  font:10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);
+  background:#0a0a0d;border-bottom:1px solid var(--line-soft);border-radius:9px 9px 0 0}
+pre.code>code{font:inherit;background:none;padding:0;white-space:pre}
+.cm{color:#5e6070;font-style:italic}.str{color:#9ce0a8}.num2{color:#f0b26b}
+.kw{color:#7fb3ff}.fn{color:#d8a6ff}
+pre.code .copy{position:absolute;top:3px;right:4px;z-index:2;font:10px/1 var(--mono);letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-faint);background:var(--panel);border:1px solid var(--line);
+  border-radius:5px;padding:5px 8px;cursor:pointer}
+pre.code .copy:hover{color:var(--ink);border-color:var(--accent)}
+code.inl{font:.88em var(--mono);background:var(--panel-2);border:1px solid var(--line);border-radius:5px;
+  padding:1.5px 5px;color:var(--ink)}
+.term{margin:0 0 14px;padding:14px 15px;background:#0c1210;border:1px solid #3d5c48;border-radius:12px;
+  font:13px/1.65 var(--mono);color:#c8f0c8;overflow-x:auto;white-space:pre;
+  box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.term b{color:#fff}
+.term .hi{color:#ffe08a}
+
+/* ===========================================================================
+   9. VISUAL COMPONENT LIBRARY  — prefer these over paragraphs
+   =========================================================================== */
+
+/* 9a. TILES — facts, numbers, definitions. 2-up mobile, 3-4-up desktop. */
+.tiles{display:grid;gap:8px;grid-template-columns:1fr 1fr;margin:0 0 14px}
+@media(min-width:620px){.tiles.c3{grid-template-columns:repeat(3,1fr)}
+  .tiles.c4{grid-template-columns:repeat(4,1fr)}}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.tile .v{font:20px/1.1 var(--sans);font-weight:700;color:var(--ink);letter-spacing:-.02em;display:block}
+.tile .v.mono{font-family:var(--mono);font-size:16px}
+.tile .l{font:10.5px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+  display:block;margin-top:6px}
+.tile.acc{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.tile.acc .v{color:var(--accent)}
+
+/* 9b. FLOW — step→step→step diagram. Vertical on mobile, horizontal ≥620px. */
+.flow{display:grid;gap:22px 10px;grid-template-columns:1fr;margin:0 0 14px}
+@media(min-width:620px){.flow{grid-auto-flow:column;grid-auto-columns:1fr;gap:10px}}
+.node{position:relative;background:var(--panel);border:1px solid var(--line);
+  border-top:2px solid var(--accent);border-radius:9px;padding:11px 12px}
+.node b{display:block;font-size:14.5px;color:var(--ink)}
+.node span{display:block;font:11.5px/1.45 var(--mono);color:var(--ink-faint);margin-top:5px}
+.node:not(:first-child)::before{content:"↓";position:absolute;left:50%;top:-19px;transform:translateX(-50%);
+  color:var(--ink-faint);font:13px/1 var(--mono)}
+@media(min-width:620px){.node:not(:first-child)::before{content:"→";left:-14px;top:22px;transform:none}}
+.node.alt{border-top-color:var(--ok)}
+.node.bad{border-top-color:var(--danger)}
+
+/* 9c. LAYERS — stacks: OSI, memory layout, kill chain, maturity levels. */
+.layers{display:grid;gap:5px;margin:0 0 14px}
+.layer{display:flex;gap:11px;align-items:baseline;background:var(--panel);border:1px solid var(--line);
+  border-left:3px solid var(--c,var(--accent));border-radius:8px;padding:10px 12px}
+.layer .i{font:11px/1.5 var(--mono);color:var(--c,var(--accent));flex:none;min-width:22px}
+.layer .n{font-weight:640;font-size:14.5px;flex:none}
+.layer .w{color:var(--ink-faint);font-size:13px;margin-left:auto;text-align:right}
+@media(max-width:520px){.layer{flex-wrap:wrap}.layer .w{margin-left:33px;text-align:left;width:100%}}
+
+/* 9d. VS — two columns: attack vs detection, weak vs strong, do vs don't. */
+.vs{display:grid;gap:9px;grid-template-columns:1fr;margin:0 0 14px}
+@media(min-width:600px){.vs{grid-template-columns:1fr 1fr}}
+.col{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px}
+.col>h4{font:10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;margin:0 0 9px;
+  color:var(--ink-faint);display:flex;align-items:center;gap:7px}
+.col>h4::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink-faint)}
+.col.bad{border-color:color-mix(in srgb,var(--danger) 30%,var(--line))}
+.col.bad>h4{color:var(--danger)}.col.bad>h4::before{background:var(--danger)}
+.col.good{border-color:color-mix(in srgb,var(--ok) 30%,var(--line))}
+.col.good>h4{color:var(--ok)}.col.good>h4::before{background:var(--ok)}
+.col ul{margin:0;padding-left:17px}
+.col li{color:var(--ink-dim);font-size:14.5px;margin:0 0 6px}
+
+/* 9e. CHIPS — vocabulary / tool lists. Replaces bulleted definition lists. */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;list-style:none}
+.chip{font:12px/1 var(--sans);color:var(--ink-dim);background:var(--panel);border:1px solid var(--line);
+  border-radius:99px;padding:7px 11px}
+.chip b{color:var(--ink);font-weight:640}
+
+/* 9f. CHECKLIST — persistent lab steps. */
+ul.chk{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+ul.chk>li{margin:0}
+ul.chk label{display:flex;gap:11px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;padding:11px 12px;cursor:pointer;font-size:14.5px;color:var(--ink-dim)}
+ul.chk label:hover{background:var(--panel-2)}
+ul.chk input{position:absolute;opacity:0;width:0;height:0}
+ul.chk .b{flex:none;width:17px;height:17px;border:1px solid var(--line);border-radius:5px;margin-top:1px;
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--accent-ink)}
+ul.chk input:checked+.b{background:var(--ok);border-color:var(--ok)}
+ul.chk input:checked+.b::after{content:"✓"}
+ul.chk input:checked~.x{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:var(--line)}
+ul.chk input:focus-visible+.b{outline:2px solid var(--accent);outline-offset:2px}
+.labtgt{font:11.5px/1.5 var(--mono);color:var(--ink-faint);margin:0 0 10px}
+.labtgt b{color:var(--ok)}
+
+/* 9g. QUIZ — interactive check-yourself with instant feedback. */
+.quiz{background:var(--bg-soft);border:1px solid var(--line);border-radius:11px;padding:14px}
+.quiz .qq{font-size:15.5px;color:var(--ink);font-weight:620;margin:0 0 12px}
+.qopts{display:grid;gap:7px}
+.qopt{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:9px;
+  padding:11px 12px;cursor:pointer;font-size:14.5px;color:var(--ink-dim);display:flex;gap:10px}
+.qopt:hover{background:var(--panel-2);color:var(--ink)}
+.qopt .m{flex:none;width:18px;height:18px;border:1px solid var(--line);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font:10px/1 var(--mono);margin-top:1px}
+.qopt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--panel));color:var(--ink)}
+.qopt.ok .m{background:var(--ok);border-color:var(--ok);color:var(--accent-ink)}
+.qopt.ok .m::after{content:"✓"}
+.qopt.no{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 9%,var(--panel));color:var(--ink)}
+.qopt.no .m{background:var(--danger);border-color:var(--danger);color:#fff}
+.qopt.no .m::after{content:"✕"}
+.qopt.reveal{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.qfb{margin:12px 0 0;padding:11px 12px;border-radius:9px;font-size:14.5px;color:var(--ink-dim);
+  background:var(--panel);border-left:2px solid var(--ink-faint)}
+.qfb.good{border-left-color:var(--ok)}
+.qfb.bad{border-left-color:var(--danger)}
+.qfb b{color:var(--ink)}
+
+/* 9h. NOTES / CALLOUTS */
+.note{border-left:2px solid var(--accent);background:var(--bg-soft);padding:11px 13px;
+  border-radius:0 9px 9px 0;margin:0 0 14px;font-size:14.5px;color:var(--ink-dim)}
+.note.legal{border-left-color:var(--danger)}
+.note.legal b{color:var(--danger)}
+.note.tip{border-left-color:var(--ok)}
+.note .lb{display:block;font:10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-faint);margin-bottom:6px}
+
+/* 9i. TABLE (comparisons only — prefer .vs or .layers) */
+.tw{overflow-x:auto;margin:0 0 14px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:460px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:10.5px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+td{color:var(--ink-dim)}td strong{color:var(--ink)}
+
+/* 9j. DEEP DIVE — put unavoidable long prose behind this, collapsed. */
+details.more{border:1px solid var(--line);border-radius:9px;background:var(--bg-soft);margin:0 0 14px}
+details.more>summary{cursor:pointer;list-style:none;padding:11px 13px;font:11.5px/1.4 var(--mono);
+  color:var(--ink-dim);letter-spacing:.03em}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"▸ "}
+details.more[open]>summary::before{content:"▾ "}
+details.more .in{padding:0 13px 13px;font-size:14.5px;color:var(--ink-dim)}
+
+/* ===========================================================================
+   10. COMPLETION SCREEN
+   =========================================================================== */
+.fin{text-align:center;padding:14px 0 0}
+.fin .ring{width:66px;height:66px;margin:0 auto 18px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:27px;color:var(--accent-ink);background:var(--accent)}
+.fin h2{font-size:clamp(23px,5.4vw,31px);margin:0 0 10px}
+.fin>p{color:var(--ink-dim);max-width:46ch;margin:0 auto 22px}
+.ncards{display:grid;gap:9px;grid-template-columns:1fr;text-align:left}
+@media(min-width:640px){.ncards{grid-template-columns:1fr 1fr}}
+.ncard{display:block;border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:15px;
+  color:var(--ink)}
+.ncard:hover{border-color:var(--accent);text-decoration:none;background:var(--panel-2)}
+.ncard .k{font:10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+  display:block;margin-bottom:8px}
+.ncard .t{font-weight:650;font-size:15.5px;display:block}
+.ncard .d{color:var(--ink-faint);font-size:13.5px;margin-top:4px;display:block}
+.ncard.back .k{color:var(--ink-faint)}
+.ncard.soon{opacity:.5;cursor:not-allowed}
+.ncard.soon:hover{border-color:var(--line);background:var(--panel)}
+.ncard.soon .k{color:var(--ink-faint)}
+.soon{font:9.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+  border:1px solid var(--line);border-radius:99px;padding:4px 7px;margin-left:6px;white-space:nowrap}
+
+footer.page{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;color:var(--ink-faint);
+  font:11.5px/1.6 var(--mono);letter-spacing:.03em;text-align:center}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}
+  html{scroll-behavior:auto}}
+
+/* HUD */
+.hud{display:flex;align-items:center;gap:10px;margin:0 0 16px;padding:9px 12px;background:var(--panel);border:1px solid var(--line);border-radius:11px}
+.hud .rank{font:10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+.hud .xpwrap{flex:1;min-width:0}
+.hud .xpmeta{display:flex;justify-content:space-between;gap:8px;margin:0 0 5px;font:10.5px/1 var(--mono);color:var(--ink-faint)}
+.hud .xpmeta b{color:var(--ink);font-weight:600}
+.hud .xpbar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.hud .xpbar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .35s ease;border-radius:99px}
+.hud .badge{font:9.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:5px 7px;border-radius:99px;border:1px solid color-mix(in srgb,var(--ok) 45%,var(--line));color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent);white-space:nowrap}
+.xptoast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(12px);z-index:70;padding:10px 14px;border-radius:10px;background:var(--panel-2);border:1px solid var(--accent);font:12.5px/1.3 var(--mono);color:var(--ink);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;white-space:nowrap;max-width:calc(100vw - 32px)}
+.xptoast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Interactive terminal — distinct from lesson prose */
+.termx{
+  --term-bg:#0c1210;
+  --term-fg:#c8f0c8;
+  --term-dim:#6a9a6a;
+  --term-chrome:#1a2220;
+  --term-line:#2a3a32;
+  margin:0 0 18px;
+  background:var(--term-bg);
+  border:1px solid #3d5c48;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 0 0 1px rgba(95,214,138,.12), 0 12px 40px rgba(0,0,0,.45);
+}
+.termx .th{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:linear-gradient(180deg,#24302a,#1a2220);
+  border-bottom:1px solid var(--term-line);
+  font:11px/1 var(--mono);letter-spacing:.06em;color:#8fb89a;
+}
+.termx .th .traffic{display:flex;gap:6px;flex:none}
+.termx .th .tb{
+  width:11px;height:11px;border-radius:50%;flex:none;min-width:11px;
+  box-shadow:inset 0 -1px 1px rgba(0,0,0,.35);
+}
+.termx .th .tb.r{background:#ff5f57}
+.termx .th .tb.y{background:#febc2e}
+.termx .th .tb.g{background:#28c840}
+.termx .th .title{flex:1;min-width:0;text-align:center;font-weight:600;color:#b7dcc4;
+  letter-spacing:.04em;text-transform:none;font-size:12px}
+.termx .th .tag{
+  flex:none;font:9.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;
+  color:#0c1210;background:#5fd68a;border-radius:99px;padding:4px 8px;font-weight:700;
+}
+.termx-screen{
+  background:var(--term-bg);
+  background-image:linear-gradient(rgba(18,40,28,.35) 1px, transparent 1px);
+  background-size:100% 4px;
+}
+.termx-out{
+  max-height:260px;overflow:auto;padding:16px 16px 8px;
+  font:13.5px/1.65 var(--mono);color:var(--term-fg);
+  white-space:pre-wrap;min-height:110px;
+  text-shadow:0 0 12px rgba(95,214,138,.15);
+}
+.termx-out .cmd{color:#e8ffe8;font-weight:600}
+.termx-out .ok{color:#9dffb0}
+.termx-out .err{color:#ff8b7a}
+.termx-out .hi{color:#ffe08a;font-weight:600}
+.termx-out b{color:#fff;font-weight:700}
+.termx-in{
+  display:flex;gap:10px;align-items:center;padding:12px 16px 16px;
+  background:var(--term-bg);border-top:0;
+}
+.termx-in .ps{
+  font:13.5px/1.4 var(--mono);color:#5fd68a;flex:none;font-weight:700;
+  text-shadow:0 0 10px rgba(95,214,138,.35);
+}
+.termx-in input{
+  flex:1;min-width:0;background:#07110c;border:1px solid #2f4a3a;border-radius:8px;
+  outline:none;color:#e8ffe8;font:13.5px/1.4 var(--mono);caret-color:#5fd68a;
+  padding:10px 12px;
+}
+.termx-in input:focus{
+  border-color:#5fd68a;
+  box-shadow:0 0 0 3px rgba(95,214,138,.18);
+}
+.termx-in input::placeholder{color:#4a6a55}
+.termx-hint{
+  margin:0;padding:10px 16px;font:12.5px/1.45 var(--mono);color:#ffe08a;
+  background:#1a1810;border-top:1px solid #4a4020;
+}
+.termx-tasks{
+  list-style:none;margin:0;padding:12px 14px 14px;display:grid;gap:8px;
+  border-top:1px solid var(--term-line);
+  background:#121a16;
+}
+.termx-tasks::before{
+  content:"MISSION CHECKLIST";
+  font:10px/1 var(--mono);letter-spacing:.14em;color:#5fd68a;
+  margin-bottom:2px;
+}
+.termx-tasks li{
+  font:13px/1.45 var(--sans);color:#b7c4bc;display:flex;gap:10px;align-items:flex-start;
+  background:#0c1210;border:1px solid #2a3a32;border-radius:8px;padding:10px 12px;
+}
+.termx-tasks li::before{content:"○";color:#6a9a6a;flex:none;font:14px/1.2 var(--mono);margin-top:1px}
+.termx-tasks li.done{color:#9dffb0;border-color:#3d6a4e;background:#0f1a14}
+.termx-tasks li.done::before{content:"✓";color:#5fd68a;font-weight:700}
+.termx-tasks code.inl{background:#1a2820;border-color:#3d5c48;color:#9dffb0}
+.mission{
+  border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));
+  background:color-mix(in srgb,var(--accent) 8%,var(--panel));
+  border-radius:11px;padding:13px;margin:0 0 12px;
+}
+.mission .kk{display:block;font:10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.mission .t{font-weight:660;font-size:15.5px;color:var(--ink);display:block}
+.mission .d{font-size:13.5px;color:var(--ink-faint);margin-top:4px;display:block}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.ncard.dc{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
+.ncard.dc:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--panel-2))}
+
+</style>
+</head>
+<body>
+
+<div class="pbar" aria-hidden="true"><i></i></div>
+<div class="xptoast" id="xpToast" role="status" aria-live="polite"></div>
+<div class="wrap">
+
+<nav class="rail" aria-label="Lesson progress">
+  <div class="in">
+    <span class="ct" id="ctr">Intro</span>
+    <div class="dots" id="dots"></div>
+    <a class="home" href="../start-here.html" title="Back to Start Here">↩ map</a>
+  </div>
+</nav>
+
+<div class="hud" id="hud" aria-label="Player progress">
+  <span class="rank" id="hudRank">Recruit</span>
+  <div class="xpwrap">
+    <div class="xpmeta"><span>XP <b id="hudXp">0</b></span><span id="hudNext">—</span></div>
+    <div class="xpbar" aria-hidden="true"><i id="hudBar"></i></div>
+  </div>
+  <span class="badge" id="hudBadge" hidden></span>
+</div>
+
+<section class="lesson" id="intro">
+  <header class="page">
+    <p class="crumb">~ <b>cybercore / linux-command-line-essentials</b> // act 1 · level 2</p>
+    <h1 class="title">Linux command-line essentials</h1>
+    <p class="lede">Live in the shell: move, read, find, pipe, and control processes.
+    Every later lab assumes you can do this without a GUI.</p>
+    <ul class="meta">
+      <li class="oc">→ Job</li>
+      <li class="oc">→ Offense</li>
+      <li class="oc">→ Defense</li>
+      <li class="tag">9 missions</li>
+      <li class="tag">~4 hrs</li>
+      <li class="tag">bash lab</li>
+      <li class="tag">+100 XP</li>
+    </ul>
+  </header>
+  <h2 class="slabel">The path</h2>
+  <p class="lede" style="font-size:15.5px">Orient → navigate → read → change files → permissions → find → pipes → processes → flag hunt.
+  Type in the sim; repeat on your own VM when you can.</p>
+  <ul class="plist" id="plist"></ul>
+  <div class="note tip"><span class="lb">Lab target</span>
+    <p>Sim uses host <b>lab@shell</b>. For real practice: your Linux VM, WSL, or a cloud box you own — never someone else's system.</p>
+  </div>
+</section>
+
+<!-- 01 -->
+<section class="lesson" data-title="Shell orientation" data-desc="Where you are, who you are" hidden>
+  <div class="lhead"><span class="n">01</span><span><span class="k">concept · terminal · check</span><h2>Shell orientation</h2></span></div>
+  <div class="blk"><h3>Concept</h3>
+    <p>The prompt is your foothold. Know <strong>who</strong> you are and <strong>where</strong> you stand before you touch anything.</p>
+    <div class="tiles c3">
+      <div class="tile"><span class="v mono">pwd</span><span class="l">print working directory</span></div>
+      <div class="tile"><span class="v mono">whoami</span><span class="l">current user</span></div>
+      <div class="tile acc"><span class="v mono">$</span><span class="l">user prompt · # = root</span></div>
+    </div>
+    <ul class="chips">
+      <li class="chip"><b>~</b> — home directory</li>
+      <li class="chip"><b>/</b> — filesystem root</li>
+      <li class="chip"><b>.</b> — here</li>
+      <li class="chip"><b>..</b> — parent</li>
+      <li class="chip"><b>Tab</b> — autocomplete</li>
+    </ul>
+  </div>
+  <div class="blk"><h3>Mission terminal</h3>
+    <div class="mission"><span class="kk">Mission</span><span class="t">Identify yourself</span><span class="d">Run whoami, then pwd. Type help if stuck.</span></div>
+    <div class="termx" data-id="orient" data-prompt="lab@shell:~$">
+      <div class="th"><span class="traffic"><span class="tb r"></span><span class="tb y"></span><span class="tb g"></span></span><span class="title">bash · lab@shell</span><span class="tag">live</span></div>
+      <div class="termx-screen">
+      <div class="termx-out"></div>
+      <form class="termx-in"><span class="ps">lab@shell:~$</span><input autocomplete="off" spellcheck="false" aria-label="Terminal input" placeholder="type a command — try help"></form>
+      </div>
+      <p class="termx-hint" hidden></p>
+      <ul class="termx-tasks">
+        <li data-task="who">Who am I? (<code class="inl">whoami</code>)</li>
+        <li data-task="pwd">Where am I? (<code class="inl">pwd</code>)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="blk lab"><h3>Lab</h3>
+    <p class="labtgt">Target: <b>your Linux / WSL / macOS terminal</b></p>
+    <ul class="chk">
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Run whoami and pwd; write both in lab-notes.md.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Run <code class="inl">echo $SHELL</code> and note which shell you use.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Run <code class="inl">uname -a</code>; note OS/kernel line.</span></label></li>
+    </ul>
+  </div>
+  <div class="blk check"><h3>Check yourself</h3>
+    <div class="quiz">
+      <p class="qq">Prompt ends with <code class="inl">#</code> instead of <code class="inl">$</code>. What does that usually mean?</p>
+      <div class="qopts">
+        <button class="qopt" type="button" data-why="$ is the normal user prompt on most Linux systems."><span class="m"></span><span>You're a normal unprivileged user</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="# traditionally means root (UID 0). Treat every command as dangerous."><span class="m"></span><span>You're root (superuser)</span></button>
+        <button class="qopt" type="button" data-why="Shell type isn't what # vs $ signals."><span class="m"></span><span>You're in zsh specifically</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="lesson" data-title="Navigate the filesystem" data-desc="cd, ls, paths" hidden>
+  <div class="lhead"><span class="n">02</span><span><span class="k">concept · terminal · lab</span><h2>Navigate the filesystem</h2></span></div>
+  <div class="blk"><h3>Concept</h3>
+    <p>Everything is a path. <strong>Absolute</strong> starts at <code class="inl">/</code>; <strong>relative</strong> starts from where you are.</p>
+    <div class="flow">
+      <div class="node"><b>/</b><span>root</span></div>
+      <div class="node"><b>/home/lab</b><span>user home = ~</span></div>
+      <div class="node"><b>~/lab</b><span>project folder</span></div>
+      <div class="node alt"><b>ls -la</b><span>see hidden + perms</span></div>
+    </div>
+    <ul class="chips">
+      <li class="chip"><b>ls</b> — list</li>
+      <li class="chip"><b>ls -la</b> — long + hidden</li>
+      <li class="chip"><b>cd DIR</b> — change dir</li>
+      <li class="chip"><b>cd ..</b> — up one</li>
+      <li class="chip"><b>cd -</b> — previous dir</li>
+      <li class="chip"><b>cd</b> — back to ~</li>
+    </ul>
+  </div>
+  <div class="blk"><h3>Mission terminal</h3>
+    <div class="mission"><span class="kk">Mission</span><span class="t">Enter ~/lab and list it</span><span class="d">ls, then cd lab, then ls -la</span></div>
+    <div class="termx" data-id="nav" data-prompt="lab@shell:~$">
+      <div class="th"><span class="traffic"><span class="tb r"></span><span class="tb y"></span><span class="tb g"></span></span><span class="title">bash · filesystem</span><span class="tag">live</span></div>
+      <div class="termx-screen">
+      <div class="termx-out"></div>
+      <form class="termx-in"><span class="ps">lab@shell:~$</span><input autocomplete="off" spellcheck="false" aria-label="Terminal input" placeholder="type a command — try help"></form>
+      </div>
+      <p class="termx-hint" hidden></p>
+      <ul class="termx-tasks">
+        <li data-task="ls">List home (<code class="inl">ls</code> or <code class="inl">ls -la</code>)</li>
+        <li data-task="cd">Enter lab (<code class="inl">cd lab</code>)</li>
+        <li data-task="lslab">List inside lab (<code class="inl">ls</code> or <code class="inl">ls -la</code>)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="blk lab"><h3>Lab</h3>
+    <p class="labtgt">Target: <b>your machine</b></p>
+    <ul class="chk">
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">cd into /tmp (or ~/Downloads); ls -la; cd back home.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Show one hidden file/dir (name starts with .).</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Use <code class="inl">cd -</code> once and confirm it toggles.</span></label></li>
+    </ul>
+  </div>
+  <div class="blk check"><h3>Check yourself</h3>
+    <div class="quiz">
+      <p class="qq">You're in <code class="inl">/home/lab/lab</code>. Which goes to home fastest?</p>
+      <div class="qopts">
+        <button class="qopt" type="button" data-why="Works, but slower than cd or cd ~."><span class="m"></span><span>cd ../../..</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="Bare cd (or cd ~) jumps to the user's home."><span class="m"></span><span>cd</span></button>
+        <button class="qopt" type="button" data-why="cd / is filesystem root, not home."><span class="m"></span><span>cd /</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="lesson" data-title="Read files" data-desc="cat, head, tail, less" hidden>
+  <div class="lhead"><span class="n">03</span><span><span class="k">concept · terminal · lab</span><h2>Read files</h2></span></div>
+  <div class="blk"><h3>Concept</h3>
+    <p>Don't open an editor just to peek. Prefer <strong>head/tail</strong> for ends, <strong>less</strong> for paging, <strong>cat</strong> for short files.</p>
+    <div class="vs">
+      <div class="col bad"><h4>Risky habit</h4><ul>
+        <li>cat huge logs into the terminal</li>
+        <li>Ignore binary files (garbage / hang)</li>
+      </ul></div>
+      <div class="col good"><h4>Better</h4><ul>
+        <li>head -n 50 file · tail -f for live</li>
+        <li>less file · /search · q to quit</li>
+        <li>file path — what type is this?</li>
+      </ul></div>
+    </div>
+  </div>
+  <div class="blk"><h3>Mission terminal</h3>
+    <div class="mission"><span class="kk">Mission</span><span class="t">Read notes.txt</span><span class="d">cd lab if needed, then cat / head notes.txt</span></div>
+    <div class="termx" data-id="read" data-prompt="lab@shell:~/lab$">
+      <div class="th"><span class="traffic"><span class="tb r"></span><span class="tb y"></span><span class="tb g"></span></span><span class="title">bash · read</span><span class="tag">live</span></div>
+      <div class="termx-screen">
+      <div class="termx-out"></div>
+      <form class="termx-in"><span class="ps">lab@shell:~/lab$</span><input autocomplete="off" spellcheck="false" aria-label="Terminal input" placeholder="type a command — try help"></form>
+      </div>
+      <p class="termx-hint" hidden></p>
+      <ul class="termx-tasks">
+        <li data-task="cat">Full file (<code class="inl">cat notes.txt</code>)</li>
+        <li data-task="head">First lines (<code class="inl">head notes.txt</code> or <code class="inl">head -n 5 notes.txt</code>)</li>
+      </ul>
+    </div>
+    <pre class="code" data-lang="bash"><code>cat notes.txt
+head -n 20 /var/log/syslog
+tail -n 50 /var/log/auth.log
+less /etc/passwd   # q to quit
+file /bin/ls</code></pre>
+  </div>
+  <div class="blk lab"><h3>Lab</h3>
+    <p class="labtgt">Target: <b>your machine</b></p>
+    <ul class="chk">
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">cat a small text file you create.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">head and tail the same file; note the difference.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Open a file with less; search with <code class="inl">/</code>; quit with q.</span></label></li>
+    </ul>
+  </div>
+  <div class="blk check"><h3>Check yourself</h3>
+    <div class="quiz">
+      <p class="qq">Best tool to watch a growing log live?</p>
+      <div class="qopts">
+        <button class="qopt" type="button" data-why="cat dumps once — it doesn't follow new lines."><span class="m"></span><span>cat logfile</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="tail -f follows appended lines — the classic live log view."><span class="m"></span><span>tail -f logfile</span></button>
+        <button class="qopt" type="button" data-why="head only shows the start of the file."><span class="m"></span><span>head -f logfile</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="lesson" data-title="Create & move files" data-desc="touch, mkdir, cp, mv, rm" hidden>
+  <div class="lhead"><span class="n">04</span><span><span class="k">concept · terminal · lab</span><h2>Create &amp; move files</h2></span></div>
+  <div class="blk"><h3>Concept</h3>
+    <p>Build structure on purpose. <strong>rm</strong> is permanent here — no Trash. Prefer <code class="inl">rm -i</code> while learning.</p>
+    <div class="flow">
+      <div class="node"><b>mkdir</b><span>make directory</span></div>
+      <div class="node"><b>touch</b><span>empty file / timestamp</span></div>
+      <div class="node"><b>cp / mv</b><span>copy or rename/move</span></div>
+      <div class="node bad"><b>rm</b><span>delete — careful</span></div>
+    </div>
+    <div class="note legal"><span class="lb">Danger</span>
+      <p><b>Never</b> run <code class="inl">rm -rf /</code> or wild deletes as root. Scope paths. Use <code class="inl">rm -ri dir</code> when unsure.</p>
+    </div>
+  </div>
+  <div class="blk"><h3>Mission terminal</h3>
+    <div class="mission"><span class="kk">Mission</span><span class="t">Build evidence/</span><span class="d">mkdir evidence, touch evidence/findings.txt, then ls evidence</span></div>
+    <div class="termx" data-id="files" data-prompt="lab@shell:~/lab$">
+      <div class="th"><span class="traffic"><span class="tb r"></span><span class="tb y"></span><span class="tb g"></span></span><span class="title">bash · files</span><span class="tag">live</span></div>
+      <div class="termx-screen">
+      <div class="termx-out"></div>
+      <form class="termx-in"><span class="ps">lab@shell:~/lab$</span><input autocomplete="off" spellcheck="false" aria-label="Terminal input" placeholder="type a command — try help"></form>
+      </div>
+      <p class="termx-hint" hidden></p>
+      <ul class="termx-tasks">
+        <li data-task="mkdir">Make dir (<code class="inl">mkdir evidence</code>)</li>
+        <li data-task="touch">Create file (<code class="inl">touch evidence/findings.txt</code>)</li>
+        <li data-task="ls">List it (<code class="inl">ls evidence</code>)</li>
+      </ul>
+    </div>
+    <pre class="code" data-lang="bash"><code>mkdir -p labs/week1
+touch labs/week1/notes.md
+cp notes.txt labs/week1/
+mv labs/week1/notes.md labs/week1/lab-notes.md
+rm -i old.txt</code></pre>
+  </div>
+  <div class="blk lab"><h3>Lab</h3>
+    <p class="labtgt">Target: <b>a folder you create under your home</b></p>
+    <ul class="chk">
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">mkdir -p practice/{in,out}; touch practice/in/a.txt</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">cp and mv that file into practice/out with a new name.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Remove only the practice tree with a careful rm -ri (or trash).</span></label></li>
+    </ul>
+  </div>
+  <div class="blk check"><h3>Check yourself</h3>
+    <div class="quiz">
+      <p class="qq"><code class="inl">mv a.txt b.txt</code> when b.txt doesn't exist does what?</p>
+      <div class="qopts">
+        <button class="qopt" type="button" data-why="That would be cp."><span class="m"></span><span>Copies a.txt to b.txt and keeps a.txt</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="mv renames/moves. No destination file ⇒ rename a.txt → b.txt."><span class="m"></span><span>Renames a.txt to b.txt</span></button>
+        <button class="qopt" type="button" data-why="mv doesn't delete without replacing/moving."><span class="m"></span><span>Deletes a.txt only</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="lesson" data-title="Permissions" data-desc="rwx, chmod, ownership" hidden>
+  <div class="lhead"><span class="n">05</span><span><span class="k">concept · terminal · check</span><h2>Permissions</h2></span></div>
+  <div class="blk"><h3>Concept</h3>
+    <p><code class="inl">ls -l</code> shows mode: type + <strong>user/group/other</strong> each with rwx. Attackers hunt world-writable and SUID bits.</p>
+    <div class="tiles c3">
+      <div class="tile"><span class="v mono">r</span><span class="l">read · 4</span></div>
+      <div class="tile"><span class="v mono">w</span><span class="l">write · 2</span></div>
+      <div class="tile acc"><span class="v mono">x</span><span class="l">execute · 1</span></div>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>Mode</th><th>Meaning</th><th>Octal</th></tr></thead>
+      <tbody>
+        <tr><td><strong>-rwxr-xr-x</strong></td><td>owner rwx · group/other rx</td><td>755</td></tr>
+        <tr><td><strong>-rw-r--r--</strong></td><td>typical file</td><td>644</td></tr>
+        <tr><td><strong>drwx------</strong></td><td>private directory</td><td>700</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="blk"><h3>Mission terminal</h3>
+    <div class="mission"><span class="kk">Mission</span><span class="t">Harden a script</span><span class="d">ls -l tool.sh, then chmod 755 tool.sh</span></div>
+    <div class="termx" data-id="perms" data-prompt="lab@shell:~/lab$">
+      <div class="th"><span class="traffic"><span class="tb r"></span><span class="tb y"></span><span class="tb g"></span></span><span class="title">bash · perms</span><span class="tag">live</span></div>
+      <div class="termx-screen">
+      <div class="termx-out"></div>
+      <form class="termx-in"><span class="ps">lab@shell:~/lab$</span><input autocomplete="off" spellcheck="false" aria-label="Terminal input" placeholder="type a command — try help"></form>
+      </div>
+      <p class="termx-hint" hidden></p>
+      <ul class="termx-tasks">
+        <li data-task="lsl">Inspect (<code class="inl">ls -l tool.sh</code>)</li>
+        <li data-task="chmod">Make executable (<code class="inl">chmod 755 tool.sh</code> or <code class="inl">chmod +x tool.sh</code>)</li>
+      </ul>
+    </div>
+    <pre class="code" data-lang="bash"><code>ls -l tool.sh
+chmod 644 notes.txt
+chmod 755 tool.sh
+chmod +x tool.sh
+# see who owns it
+ls -l · id · groups</code></pre>
+  </div>
+  <div class="blk lab"><h3>Lab</h3>
+    <p class="labtgt">Target: <b>files you own</b></p>
+    <ul class="chk">
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Create a script; chmod +x; run it with ./name.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">ls -l before/after; confirm the x bit flipped.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Explain in one line what 644 vs 755 means.</span></label></li>
+    </ul>
+  </div>
+  <div class="blk check"><h3>Check yourself</h3>
+    <div class="quiz">
+      <p class="qq">File mode ends with <code class="inl">rw-rw-rw-</code> (666). Security issue?</p>
+      <div class="qopts">
+        <button class="qopt" type="button" data-why="Any local user can write it — classic misconfiguration."><span class="m"></span><span>No — world-writable is fine for scripts</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="World-writable files can be tampered by any user — high value for attackers."><span class="m"></span><span>Yes — any user can modify it</span></button>
+        <button class="qopt" type="button" data-why="666 has no execute bit; the issue is write for others."><span class="m"></span><span>Only that it isn't executable</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="lesson" data-title="Find anything" data-desc="find, which, locate mindset" hidden>
+  <div class="lhead"><span class="n">06</span><span><span class="k">concept · terminal · lab</span><h2>Find anything</h2></span></div>
+  <div class="blk"><h3>Concept</h3>
+    <p>Recon on disk: <strong>find</strong> by name/type/perm, <strong>which</strong> for binaries on PATH, <strong>grep -R</strong> for content.</p>
+    <ul class="chips">
+      <li class="chip"><b>find . -name '*.conf'</b></li>
+      <li class="chip"><b>find / -perm -4000</b> — SUID (careful)</li>
+      <li class="chip"><b>which nmap</b></li>
+      <li class="chip"><b>type cd</b> — builtin vs binary</li>
+      <li class="chip"><b>grep -Rni 'password' .</b></li>
+    </ul>
+  </div>
+  <div class="blk"><h3>Mission terminal</h3>
+    <div class="mission"><span class="kk">Mission</span><span class="t">Locate secrets.txt</span><span class="d">find . -name secrets.txt</span></div>
+    <div class="termx" data-id="find" data-prompt="lab@shell:~/lab$">
+      <div class="th"><span class="traffic"><span class="tb r"></span><span class="tb y"></span><span class="tb g"></span></span><span class="title">bash · find</span><span class="tag">live</span></div>
+      <div class="termx-screen">
+      <div class="termx-out"></div>
+      <form class="termx-in"><span class="ps">lab@shell:~/lab$</span><input autocomplete="off" spellcheck="false" aria-label="Terminal input" placeholder="type a command — try help"></form>
+      </div>
+      <p class="termx-hint" hidden></p>
+      <ul class="termx-tasks">
+        <li data-task="find">Find the file (<code class="inl">find . -name secrets.txt</code>)</li>
+        <li data-task="which">Locate a binary (<code class="inl">which bash</code>)</li>
+      </ul>
+    </div>
+    <pre class="code" data-lang="bash"><code>find . -name '*.txt'
+find . -type f -size +1M
+which python3
+grep -Rni 'api_key' . --include='*.env'</code></pre>
+  </div>
+  <div class="blk lab"><h3>Lab</h3>
+    <p class="labtgt">Target: <b>a directory you own</b></p>
+    <ul class="chk">
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">find . -name '*.md' from a project folder.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">which and type for ls vs cd — note the difference.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">grep -Rni a string you know exists; limit with --include.</span></label></li>
+    </ul>
+  </div>
+  <div class="blk check"><h3>Check yourself</h3>
+    <div class="quiz">
+      <p class="qq"><code class="inl">which cd</code> often prints nothing useful. Why?</p>
+      <div class="qopts">
+        <button class="qopt" type="button" data-why="cd exists — but as a shell builtin, not always a PATH binary."><span class="m"></span><span>cd is not installed on Linux</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="cd is a shell builtin. which looks for executables on PATH — use type cd."><span class="m"></span><span>cd is usually a shell builtin</span></button>
+        <button class="qopt" type="button" data-why="Permissions aren't why which fails here."><span class="m"></span><span>You need root to see it</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 -->
+<section class="lesson" data-title="Pipes & filters" data-desc="|, >, >>, grep, wc, sort" hidden>
+  <div class="lhead"><span class="n">07</span><span><span class="k">concept · terminal · lab</span><h2>Pipes &amp; filters</h2></span></div>
+  <div class="blk"><h3>Concept</h3>
+    <p>Unix power move: one tool's stdout → next tool's stdin with <strong>|</strong>. Redirect with <strong>&gt;</strong> (overwrite) and <strong>&gt;&gt;</strong> (append).</p>
+    <div class="flow">
+      <div class="node"><b>ps aux</b><span>list processes</span></div>
+      <div class="node"><b>grep ssh</b><span>filter lines</span></div>
+      <div class="node"><b>wc -l</b><span>count</span></div>
+      <div class="node alt"><b>&gt; out.txt</b><span>save</span></div>
+    </div>
+  </div>
+  <div class="blk"><h3>Mission terminal</h3>
+    <div class="mission"><span class="kk">Mission</span><span class="t">Filter auth noise</span><span class="d">cat auth.log | grep Failed · then wc -l</span></div>
+    <div class="termx" data-id="pipes" data-prompt="lab@shell:~/lab$">
+      <div class="th"><span class="traffic"><span class="tb r"></span><span class="tb y"></span><span class="tb g"></span></span><span class="title">bash · pipes</span><span class="tag">live</span></div>
+      <div class="termx-screen">
+      <div class="termx-out"></div>
+      <form class="termx-in"><span class="ps">lab@shell:~/lab$</span><input autocomplete="off" spellcheck="false" aria-label="Terminal input" placeholder="type a command — try help"></form>
+      </div>
+      <p class="termx-hint" hidden></p>
+      <ul class="termx-tasks">
+        <li data-task="grep">Filter Failed (<code class="inl">cat auth.log | grep Failed</code> or <code class="inl">grep Failed auth.log</code>)</li>
+        <li data-task="count">Count hits (<code class="inl">cat auth.log | grep Failed | wc -l</code> or <code class="inl">grep -c Failed auth.log</code>)</li>
+      </ul>
+    </div>
+    <pre class="code" data-lang="bash"><code>cat auth.log | grep Failed
+grep Failed auth.log | wc -l
+ps aux | grep nginx
+sort users.txt | uniq -c | sort -nr
+echo hi >> out.txt</code></pre>
+  </div>
+  <div class="blk lab"><h3>Lab</h3>
+    <p class="labtgt">Target: <b>your machine</b></p>
+    <ul class="chk">
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Pipe ls -la through grep to filter one pattern.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Save command output with &gt; to a file; append with &gt;&gt;.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Count lines in a file with wc -l.</span></label></li>
+    </ul>
+  </div>
+  <div class="blk check"><h3>Check yourself</h3>
+    <div class="quiz">
+      <p class="qq"><code class="inl">cmd &gt; out.txt</code> when out.txt already exists…</p>
+      <div class="qopts">
+        <button class="qopt" type="button" data-why="That's >> append behavior."><span class="m"></span><span>Appends to the end</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="> truncates/overwrites the file, then writes."><span class="m"></span><span>Overwrites the file</span></button>
+        <button class="qopt" type="button" data-why="Shell will overwrite; it won't refuse by default."><span class="m"></span><span>Fails with an error</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 -->
+<section class="lesson" data-title="Processes" data-desc="ps, top, kill, jobs" hidden>
+  <div class="lhead"><span class="n">08</span><span><span class="k">concept · terminal · lab</span><h2>Processes</h2></span></div>
+  <div class="blk"><h3>Concept</h3>
+    <p>Every running program has a <strong>PID</strong>. List with ps, inspect with top/htop, stop with kill — know the signal.</p>
+    <div class="tiles c3">
+      <div class="tile"><span class="v mono">ps</span><span class="l">snapshot</span></div>
+      <div class="tile"><span class="v mono">top</span><span class="l">live view</span></div>
+      <div class="tile acc"><span class="v mono">kill</span><span class="l">SIGTERM default</span></div>
+    </div>
+    <ul class="chips">
+      <li class="chip"><b>ps aux</b> — all users</li>
+      <li class="chip"><b>kill PID</b> — polite stop</li>
+      <li class="chip"><b>kill -9 PID</b> — force (last resort)</li>
+      <li class="chip"><b>jobs / fg / bg</b> — shell jobs</li>
+      <li class="chip"><b>Ctrl+C</b> — SIGINT foreground</li>
+      <li class="chip"><b>Ctrl+Z</b> — suspend</li>
+    </ul>
+  </div>
+  <div class="blk"><h3>Mission terminal</h3>
+    <div class="mission"><span class="kk">Mission</span><span class="t">Find the noisy process</span><span class="d">ps aux | grep miner · note the PID</span></div>
+    <div class="termx" data-id="procs" data-prompt="lab@shell:~/lab$">
+      <div class="th"><span class="traffic"><span class="tb r"></span><span class="tb y"></span><span class="tb g"></span></span><span class="title">bash · processes</span><span class="tag">live</span></div>
+      <div class="termx-screen">
+      <div class="termx-out"></div>
+      <form class="termx-in"><span class="ps">lab@shell:~/lab$</span><input autocomplete="off" spellcheck="false" aria-label="Terminal input" placeholder="type a command — try help"></form>
+      </div>
+      <p class="termx-hint" hidden></p>
+      <ul class="termx-tasks">
+        <li data-task="ps">List processes (<code class="inl">ps aux</code>)</li>
+        <li data-task="grep">Find miner (<code class="inl">ps aux | grep miner</code>)</li>
+      </ul>
+    </div>
+    <pre class="code" data-lang="bash"><code>ps aux | head
+ps aux | grep nginx
+kill 1234
+kill -9 1234   # only if needed
+top            # q to quit</code></pre>
+  </div>
+  <div class="blk lab"><h3>Lab</h3>
+    <p class="labtgt">Target: <b>your machine</b></p>
+    <ul class="chk">
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">ps aux | head and identify your shell's PID.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Start <code class="inl">sleep 300 &amp;</code>; find it; kill it politely.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Open top or htop briefly; quit cleanly.</span></label></li>
+    </ul>
+  </div>
+  <div class="blk check"><h3>Check yourself</h3>
+    <div class="quiz">
+      <p class="qq">Prefer first stop signal for a stuck app?</p>
+      <div class="qopts">
+        <button class="qopt" type="button" data-why="-9/SIGKILL can't be caught — no cleanup. Last resort only."><span class="m"></span><span>kill -9 immediately</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="Default kill sends SIGTERM — process can exit cleanly."><span class="m"></span><span>kill PID (SIGTERM)</span></button>
+        <button class="qopt" type="button" data-why="reboot is nuclear and unrelated to one process."><span class="m"></span><span>reboot the box</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 capstone -->
+<section class="lesson" data-title="Shell CTF" data-desc="Combine skills — find the flag" hidden>
+  <div class="lhead"><span class="n">09</span><span><span class="k">mission · lab · check</span><h2>Shell CTF</h2></span></div>
+  <div class="blk"><h3>Concept</h3>
+    <p>One loop: list → find → read → filter. That's how you triage a box during IR or a CTF.</p>
+    <div class="flow">
+      <div class="node"><b>ls -la</b><span>what's here</span></div>
+      <div class="node"><b>find</b><span>hidden paths</span></div>
+      <div class="node"><b>cat / grep</b><span>extract signal</span></div>
+      <div class="node alt"><b>flag</b><span>proof</span></div>
+    </div>
+  </div>
+  <div class="blk"><h3>Mission terminal</h3>
+    <div class="mission"><span class="kk">Capstone</span><span class="t">Capture FLAG{...}</span><span class="d">find the flag file under .hidden and cat it</span></div>
+    <div class="termx" data-id="ctf" data-prompt="lab@shell:~/lab$">
+      <div class="th"><span class="traffic"><span class="tb r"></span><span class="tb y"></span><span class="tb g"></span></span><span class="title">bash · ctf</span><span class="tag">live</span></div>
+      <div class="termx-screen">
+      <div class="termx-out"></div>
+      <form class="termx-in"><span class="ps">lab@shell:~/lab$</span><input autocomplete="off" spellcheck="false" aria-label="Terminal input" placeholder="type a command — try help"></form>
+      </div>
+      <p class="termx-hint" hidden></p>
+      <ul class="termx-tasks">
+        <li data-task="find">Find flag (<code class="inl">find . -name flag.txt</code>)</li>
+        <li data-task="cat">Read it (<code class="inl">cat .hidden/flag.txt</code>)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="blk lab"><h3>Lab</h3>
+    <p class="labtgt">Target: <b>your practice folder</b></p>
+    <ul class="chk">
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Hide a string in a nested file; find it with find + grep only.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">Write your command chain into lab-notes.md.</span></label></li>
+      <li><label><input type="checkbox"><span class="b"></span><span class="x">List 5 commands from this level you'll reuse weekly.</span></label></li>
+    </ul>
+  </div>
+  <div class="blk check"><h3>Check yourself</h3>
+    <div class="quiz">
+      <p class="qq">Best first move on an unfamiliar directory in a CTF?</p>
+      <div class="qopts">
+        <button class="qopt" type="button" data-why="Blind rm loses evidence and flags."><span class="m"></span><span>rm -rf * to clear noise</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="Orient with ls -la (see hidden), then find/grep with purpose."><span class="m"></span><span>ls -la then find/grep with a goal</span></button>
+        <button class="qopt" type="button" data-why="chmod -R 777 is dangerous and usually wrong."><span class="m"></span><span>chmod -R 777 .</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="lesson" id="fin" hidden>
+  <div class="fin">
+    <div class="ring">✓</div>
+    <h2>Level clear — Linux CLI</h2>
+    <p>You can <strong>navigate, read, change permissions, find files, pipe filters, and manage processes</strong>.
+    That's the shell half of every cyber lab.</p>
+    <div class="tiles c3" style="text-align:left;margin-bottom:22px">
+      <div class="tile acc"><span class="v" id="finSteps">9/9</span><span class="l">steps done</span></div>
+      <div class="tile"><span class="v" id="finLabs">0/0</span><span class="l">lab tasks</span></div>
+      <div class="tile"><span class="v" id="finQuiz">0/0</span><span class="l">checks passed</span></div>
+    </div>
+    <div class="ncards">
+      <a class="ncard" href="cybersecurity-essentials.html">
+        <span class="k">Next in CyberCore</span>
+        <span class="t">Cybersecurity essentials</span>
+        <span class="d">CIA · risk · kill chain · IR judgment.</span>
+      </a>
+      <a class="ncard" href="networking-fundamentals.html">
+        <span class="k">Previous</span>
+        <span class="t">Networking fundamentals</span>
+        <span class="d">Revisit packets, ports, and recon.</span>
+      </a>
+      <a class="ncard dc" href="https://whop.com/checkout/3Ugn8Q3jNpHU2kPeEN-0Xm3-uqfq-nck6-mRWOKnNAVQNB/" target="_blank" rel="noopener noreferrer"><span class="k">Unlock on Discord</span><span class="t">Join the academy</span><span class="d">Jobs · mentors · gated labs</span></a><a class="ncard back" href="../start-here.html">
+        <span class="k">Back to</span>
+        <span class="t">Your campaign</span>
+        <span class="d">Act 1 map.</span>
+      </a>
+      <a class="ncard back" href="#" id="restart">
+        <span class="k">Or</span>
+        <span class="t">Replay this level</span>
+        <span class="d">Jump any mission again.</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="lnav">
+  <div class="in">
+    <button class="btn ghost" id="prev" type="button">← Back</button>
+    <span class="sp"></span>
+    <button class="btn pri" id="next" type="button">Start →</button>
+  </div>
+</div>
+<footer class="page">
+  Outcome: Job · Offense · Defense &nbsp;·&nbsp; Authorized targets only — your lab, your VM, your shell.
+</footer>
+</div>
+
+
+<script>
+(function(){
+"use strict";
+
+var PROG_KEY="csa:progress";
+var RANKS=[
+  {id:"recruit",name:"Recruit",min:0},
+  {id:"initiate",name:"Initiate",min:50},
+  {id:"operator",name:"Operator",min:250},
+  {id:"ready",name:"Job Ready",min:800},
+  {id:"specialist",name:"Specialist",min:1400}
+];
+var PROG={xp:0,badges:[],cleared:[],plan:null};
+try{var pr=localStorage.getItem(PROG_KEY); if(pr) PROG=Object.assign(PROG,JSON.parse(pr));
+  if(!Array.isArray(PROG.badges)) PROG.badges=[];
+  if(!Array.isArray(PROG.cleared)) PROG.cleared=[];
+}catch(e){}
+function saveProg(){try{localStorage.setItem(PROG_KEY,JSON.stringify(PROG));}catch(e){}}
+function rankOf(xp){var r=RANKS[0]; for(var i=0;i<RANKS.length;i++) if(xp>=RANKS[i].min) r=RANKS[i]; return r;}
+function nextRank(xp){for(var i=0;i<RANKS.length;i++) if(RANKS[i].min>xp) return RANKS[i]; return null;}
+function paintHud(flash){
+  var r=rankOf(PROG.xp), n=nextRank(PROG.xp);
+  var elR=document.getElementById("hudRank"), elX=document.getElementById("hudXp"),
+      elN=document.getElementById("hudNext"), elB=document.getElementById("hudBar"),
+      elBadge=document.getElementById("hudBadge");
+  if(elR) elR.textContent=r.name;
+  if(elX) elX.textContent=String(PROG.xp);
+  if(elN) elN.textContent=n?((n.min-PROG.xp)+" to "+n.name):"max rank";
+  if(elB){var lo=r.min, hi=n?n.min:r.min+100; elB.style.width=(n?Math.min(100,((PROG.xp-lo)/(hi-lo))*100):100)+"%";}
+  if(elBadge){
+    if(flash){elBadge.hidden=false; elBadge.textContent="+ "+flash;}
+    else if(PROG.badges.length){elBadge.hidden=false; elBadge.textContent=PROG.badges[PROG.badges.length-1];}
+    else elBadge.hidden=true;
+  }
+}
+function toast(msg){
+  var t=document.getElementById("xpToast"); if(!t) return;
+  t.textContent=msg; t.classList.add("on");
+  clearTimeout(toast._t); toast._t=setTimeout(function(){t.classList.remove("on");},2200);
+}
+function award(levelId,xp,badge){
+  if(PROG.cleared.indexOf(levelId)!==-1){paintHud(); return false;}
+  PROG.cleared.push(levelId); PROG.xp+=(xp|0);
+  if(badge && PROG.badges.indexOf(badge)===-1) PROG.badges.push(badge);
+  saveProg(); paintHud(badge||null); toast("+"+xp+" XP"+(badge?" · "+badge:"")); return true;
+}
+paintHud();
+
+var intro=document.getElementById("intro");
+var fin=document.getElementById("fin");
+var steps=[].slice.call(document.querySelectorAll(".lesson[data-title]"));
+var screens=[intro].concat(steps,[fin]);
+var dotsEl=document.getElementById("dots");
+var ctrEl=document.getElementById("ctr");
+var prevB=document.getElementById("prev");
+var nextB=document.getElementById("next");
+var fillEl=document.querySelector(".pbar > i");
+var plist=document.getElementById("plist");
+var LAST=screens.length-1;
+
+var KEY="csa:cybercore/linux-command-line-essentials.html";
+var S={i:0,done:{},labs:{},quiz:{},term:{},cwd:{}};
+try{var raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S,JSON.parse(raw));}catch(e){}
+if(!S.term) S.term={}; if(!S.cwd) S.cwd={};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+steps.forEach(function(s,i){
+  s.id="s"+(i+1);
+  var b=document.createElement("li");
+  b.className="pitem"; b.setAttribute("role","button"); b.tabIndex=0;
+  b.innerHTML='<span><span class="t"></span><span class="d"></span></span><span class="go">→</span>';
+  b.querySelector(".t").textContent=s.getAttribute("data-title")||("Step "+(i+1));
+  b.querySelector(".d").textContent=s.getAttribute("data-desc")||"";
+  function go(){show(i+1);}
+  b.addEventListener("click",go);
+  b.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});
+  if(plist) plist.appendChild(b);
+});
+steps.forEach(function(s,i){
+  var d=document.createElement("button");
+  d.className="dot"; d.type="button";
+  d.title=(i+1)+". "+(s.getAttribute("data-title")||"");
+  d.setAttribute("aria-label",d.title);
+  d.addEventListener("click",function(){show(i+1);});
+  dotsEl.appendChild(d);
+});
+
+var cur=0;
+function toTop(){ try{window.scrollTo(0,0);return;}catch(e){} try{document.querySelector(".rail").scrollIntoView({block:"start"});}catch(e){} }
+function paint(){
+  steps.forEach(function(s,i){
+    var d=dotsEl.children[i];
+    var state=S.done[s.id]?"done":"";
+    if(cur===i+1) state="active";
+    if(d) d.setAttribute("data-state",state);
+    var pi=plist&&plist.children[i];
+    if(pi) pi.classList.toggle("done",!!S.done[s.id]);
+  });
+  var done=steps.filter(function(s){return S.done[s.id];}).length;
+  if(fillEl) fillEl.style.width=(done/steps.length*100)+"%";
+  if(cur===0) ctrEl.innerHTML="Intro";
+  else if(cur===LAST) ctrEl.innerHTML="<b>Done</b>";
+  else ctrEl.innerHTML="Step <b>"+cur+"</b>/"+steps.length;
+  var fs=document.getElementById("finSteps");
+  if(fs){
+    fs.textContent=done+"/"+steps.length;
+    var labEl=document.getElementById("finLabs");
+    var quizEl=document.getElementById("finQuiz");
+    if(labEl && typeof boxes!=="undefined") labEl.textContent=boxes.filter(function(b){return b.checked;}).length+"/"+boxes.length;
+    if(quizEl && typeof quizzes!=="undefined") quizEl.textContent=Object.keys(S.quiz).filter(function(k){return S.quiz[k].ok;}).length+"/"+quizzes.length;
+  }
+}
+function show(i,noScroll){
+  cur=Math.max(0,Math.min(LAST,i));
+  screens.forEach(function(sc,k){ if(sc) sc.hidden=(k!==cur); });
+  prevB.hidden=(cur===0);
+  nextB.hidden=false;
+  if(cur===0){ nextB.textContent=steps.length?"Start → Mission 1":"Start"; }
+  else if(cur===LAST){ nextB.hidden=true; try{award("cybercore/linux-command-line-essentials",100,"shell-ops");}catch(e){} }
+  else { nextB.textContent=(cur===steps.length)?"Finish ✓":"Next →"; }
+  S.i=cur; save(); paint();
+  try{history.replaceState(null,"",cur===0?"#":("#"+(cur===LAST?"done":"s"+cur)));}catch(e){}
+  if(!noScroll) toTop();
+}
+nextB.addEventListener("click",function(){
+  if(cur>=1&&cur<=steps.length){ S.done[steps[cur-1].id]=1; save(); }
+  show(cur+1);
+});
+prevB.addEventListener("click",function(){show(cur-1);});
+document.addEventListener("keydown",function(e){
+  if(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+  if(e.key==="ArrowRight" && nextB && !nextB.hidden) nextB.click();
+  if(e.key==="ArrowLeft"&&cur>0) show(cur-1);
+});
+var rs=document.getElementById("restart");
+if(rs) rs.addEventListener("click",function(e){e.preventDefault(); show(0);});
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+(function(){
+  try{
+    var KW=("if|else|elif|fi|then|for|while|do|done|case|esac|function|return|echo|cat|grep|awk|sed|cut|sort|uniq|head|tail|curl|chmod|chown|sudo|apt|docker|nmap|find|pwd|whoami|ls|cd|mkdir|touch|cp|mv|rm|ps|kill|wc|less|file|which|type|top|jobs");
+    var RE=new RegExp(
+      "(#[^\\n]*|\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/)"+
+      "|(\"(?:[^\"\\\\\\n]|\\\\.)*\"|'(?:[^'\\\\\\n]|\\\\.)*')"+
+      "|(\\b\\d+(?:\\.\\d+)?\\b)"+
+      "|(\\b(?:"+KW+")\\b)"+
+      "|([A-Za-z_][A-Za-z0-9_]*)(?=\\()","g");
+    document.querySelectorAll("pre.code > code").forEach(function(c){
+      c.innerHTML=esc(c.textContent).replace(RE,function(m,cm,str,n,kw,fn){
+        if(cm) return '<span class="cm">'+cm+'</span>';
+        if(str)return '<span class="str">'+str+'</span>';
+        if(n)  return '<span class="num2">'+n+'</span>';
+        if(kw) return '<span class="kw">'+kw+'</span>';
+        if(fn) return '<span class="fn">'+fn+'</span>';
+        return m;
+      });
+    });
+  }catch(e){}
+  document.querySelectorAll("pre.code").forEach(function(pre){
+    if(pre.querySelector(".copy")) return;
+    var b=document.createElement("button"); b.className="copy"; b.type="button"; b.textContent="copy";
+    b.addEventListener("click",function(){
+      var txt=pre.querySelector("code").textContent;
+      function done(){b.textContent="copied"; setTimeout(function(){b.textContent="copy";},1400);}
+      function fallback(){var t=document.createElement("textarea"); t.value=txt; t.setAttribute("readonly","");
+        t.style.cssText="position:fixed;top:0;left:-9999px"; document.body.appendChild(t); t.select();
+        try{document.execCommand("copy"); done();}catch(e){b.textContent="select manually";}
+        document.body.removeChild(t);}
+      if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done,fallback); else fallback();
+    });
+    pre.appendChild(b);
+  });
+})();
+
+var boxes=[].slice.call(document.querySelectorAll("ul.chk input[type=checkbox]"));
+boxes.forEach(function(cb,i){
+  var id="L"+i; cb.checked=!!S.labs[id];
+  cb.addEventListener("change",function(){ if(cb.checked) S.labs[id]=1; else delete S.labs[id]; save(); paint(); });
+});
+
+var quizzes=[].slice.call(document.querySelectorAll(".quiz"));
+quizzes.forEach(function(q,qi){
+  var id="Q"+qi; var opts=[].slice.call(q.querySelectorAll(".qopt"));
+  var fb=document.createElement("div"); fb.className="qfb"; fb.hidden=true; q.appendChild(fb);
+  function answer(idx,silent){
+    var o=opts[idx]; if(!o) return;
+    var ok=o.getAttribute("data-ok")==="1";
+    opts.forEach(function(x){x.classList.remove("ok","no","reveal");});
+    o.classList.add(ok?"ok":"no");
+    if(!ok) opts.forEach(function(x){if(x.getAttribute("data-ok")==="1") x.classList.add("reveal");});
+    fb.hidden=false; fb.className="qfb "+(ok?"good":"bad");
+    fb.innerHTML="<b>"+(ok?"Correct. ":"Not quite. ")+"</b>"+(o.getAttribute("data-why")||"");
+    if(!ok){var right=opts.filter(function(x){return x.getAttribute("data-ok")==="1";})[0];
+      if(right) fb.innerHTML+=" <b>The answer:</b> "+right.querySelector("span:last-child").textContent+" — "+(right.getAttribute("data-why")||"");}
+    if(!silent){S.quiz[id]={i:idx,ok:ok?1:0}; save(); paint();}
+  }
+  opts.forEach(function(o,i){o.addEventListener("click",function(){answer(i);});});
+  if(S.quiz[id]) answer(S.quiz[id].i,true);
+});
+
+/* ---------- terminals ---------- */
+var TERMX={
+  orient:{
+    welcome:"GNU bash, lab shell. Type help\n",
+    cmds:{
+      "help":"Commands: whoami | pwd | echo hi | clear | uname -a | help",
+      "clear":"__CLEAR__",
+      "whoami":"<b>lab</b>",
+      "pwd":"<b>/home/lab</b>",
+      "echo hi":"hi",
+      "uname -a":"Linux lab 6.1.0-lab #1 SMP x86_64 GNU/Linux"
+    },
+    tasks:{who:["whoami"], pwd:["pwd"]}
+  },
+  nav:{
+    welcome:"Home directory. Contents wait for ls.\n",
+    state:"home",
+    cmds:{},
+    dynamic:true,
+    tasks:{ls:["ls","ls -la","ls -l","ls -al"], cd:["cd lab","cd ~/lab"], lslab:["ls","ls -la","ls -l","ls -al"]}
+  },
+  read:{
+    welcome:"You're in ~/lab. Read notes.txt\n",
+    cmds:{
+      "help":"Commands: cat notes.txt | head notes.txt | head -n 5 notes.txt | tail notes.txt | clear",
+      "clear":"__CLEAR__",
+      "cat notes.txt":"# lab notes\nDay 1: learn the shell.\nDay 2: don't fear the terminal.\n<span class=\"hi\">Reminder: authorized targets only.</span>",
+      "head notes.txt":"# lab notes\nDay 1: learn the shell.\nDay 2: don't fear the terminal.",
+      "head -n 5 notes.txt":"# lab notes\nDay 1: learn the shell.\nDay 2: don't fear the terminal.\nReminder: authorized targets only.\n(end of short file)",
+      "tail notes.txt":"Day 2: don't fear the terminal.\n<span class=\"hi\">Reminder: authorized targets only.</span>",
+      "ls":"notes.txt  tool.sh  auth.log  .hidden",
+      "ls -la":"drwxr-xr-x  lab lab  .hidden\n-rw-r--r--  lab lab  auth.log\n-rw-r--r--  lab lab  notes.txt\n-rw-r--r--  lab lab  tool.sh"
+    },
+    tasks:{cat:["cat notes.txt"], head:["head notes.txt","head -n 5 notes.txt"]}
+  },
+  files:{
+    welcome:"Build an evidence folder.\n",
+    cmds:{
+      "help":"Commands: mkdir evidence | touch evidence/findings.txt | ls evidence | ls | clear",
+      "clear":"__CLEAR__",
+      "mkdir evidence":"",
+      "touch evidence/findings.txt":"",
+      "ls evidence":"<b>findings.txt</b>",
+      "ls":"auth.log  evidence  notes.txt  tool.sh  .hidden",
+      "ls -la":"drwxr-xr-x  evidence\n-rw-r--r--  auth.log\n-rw-r--r--  notes.txt\n-rw-r--r--  tool.sh"
+    },
+    tasks:{mkdir:["mkdir evidence"], touch:["touch evidence/findings.txt"], ls:["ls evidence"]}
+  },
+  perms:{
+    welcome:"Inspect and fix tool.sh permissions.\n",
+    cmds:{
+      "help":"Commands: ls -l tool.sh | chmod 755 tool.sh | chmod +x tool.sh | clear",
+      "clear":"__CLEAR__",
+      "ls -l tool.sh":"<span class=\"hi\">-rw-r--r--</span> 1 lab lab 120 tool.sh",
+      "ls -l":"-rw-r--r-- 1 lab lab  80 auth.log\n-rw-r--r-- 1 lab lab  90 notes.txt\n<span class=\"hi\">-rw-r--r--</span> 1 lab lab 120 tool.sh",
+      "chmod 755 tool.sh":"",
+      "chmod +x tool.sh":""
+    },
+    after:{"chmod 755 tool.sh":"mode is now <b>-rwxr-xr-x</b>","chmod +x tool.sh":"mode is now <b>-rwxr-xr-x</b>"},
+    tasks:{lsl:["ls -l tool.sh","ls -l"], chmod:["chmod 755 tool.sh","chmod +x tool.sh"]}
+  },
+  find:{
+    welcome:"Something named secrets.txt is nested here.\n",
+    cmds:{
+      "help":"Commands: find . -name secrets.txt | ls -la | which bash | clear",
+      "clear":"__CLEAR__",
+      "find . -name secrets.txt":"<b>./.hidden/secrets.txt</b>",
+      "find . -name '*.txt'":"./notes.txt\n./.hidden/secrets.txt\n./.hidden/flag.txt",
+      "ls -la":"drwxr-xr-x  .hidden\n-rw-r--r--  auth.log\n-rw-r--r--  notes.txt\n-rwxr-xr-x  tool.sh",
+      "which bash":"<b>/usr/bin/bash</b>",
+      "cat .hidden/secrets.txt":"db_pass=<span class=\"hi\">not-production</span>"
+    },
+    tasks:{find:["find . -name secrets.txt"], which:["which bash"]}
+  },
+  pipes:{
+    welcome:"auth.log is noisy. Filter Failed logins.\n",
+    cmds:{
+      "help":"Commands: cat auth.log | grep Failed | … | wc -l · or grep -c Failed auth.log",
+      "clear":"__CLEAR__",
+      "cat auth.log":"Accepted password for lab\nFailed password for root from 10.0.0.9\nFailed password for admin from 10.0.0.9\nAccepted publickey for lab\nFailed password for root from 10.0.0.9",
+      "cat auth.log | grep failed":"Failed password for root from 10.0.0.9\nFailed password for admin from 10.0.0.9\nFailed password for root from 10.0.0.9",
+      "grep failed auth.log":"Failed password for root from 10.0.0.9\nFailed password for admin from 10.0.0.9\nFailed password for root from 10.0.0.9",
+      "cat auth.log | grep failed | wc -l":"<b>3</b>",
+      "grep -c failed auth.log":"<b>3</b>",
+      "grep failed auth.log | wc -l":"<b>3</b>"
+    },
+    tasks:{
+      grep:["cat auth.log | grep failed","grep failed auth.log"],
+      count:["cat auth.log | grep failed | wc -l","grep -c failed auth.log","grep failed auth.log | wc -l"]
+    }
+  },
+  procs:{
+    welcome:"Something called miner is eating CPU.\n",
+    cmds:{
+      "help":"Commands: ps aux | ps aux | grep miner | clear",
+      "clear":"__CLEAR__",
+      "ps aux":"USER PID %CPU CMD\nlab  1042  0.0 bash\nlab  2201  0.1 sshd\nroot 4410 88.0 <span class=\"hi\">./miner</span>\nlab  5122  0.0 ps",
+      "ps aux | grep miner":"root  <b>4410</b> 88.0 ./miner\nlab   5128  0.0 grep miner"
+    },
+    tasks:{ps:["ps aux"], grep:["ps aux | grep miner"]}
+  },
+  ctf:{
+    welcome:"Capstone: find FLAG{...} under a hidden path.\n",
+    cmds:{
+      "help":"Commands: ls -la | find . -name flag.txt | cat .hidden/flag.txt | clear",
+      "clear":"__CLEAR__",
+      "ls":"auth.log  notes.txt  tool.sh",
+      "ls -la":"drwxr-xr-x  <b>.hidden</b>\n-rw-r--r--  auth.log\n-rw-r--r--  notes.txt\n-rwxr-xr-x  tool.sh",
+      "find . -name flag.txt":"<b>./.hidden/flag.txt</b>",
+      "cat .hidden/flag.txt":"<span class=\"hi\">FLAG{sh3ll_0ps_l4b}</span>",
+      "cat ./.hidden/flag.txt":"<span class=\"hi\">FLAG{sh3ll_0ps_l4b}</span>"
+    },
+    tasks:{find:["find . -name flag.txt"], cat:["cat .hidden/flag.txt","cat ./.hidden/flag.txt"]}
+  }
+};
+
+function norm(s){return String(s||"").trim().replace(/\s+/g," ").toLowerCase();}
+
+function navHandle(box, conf, c, raw, write, taskEls){
+  if(!S.cwd.nav) S.cwd.nav="home";
+  var cwd=S.cwd.nav;
+  if(c==="help"){ write("Commands: ls | ls -la | cd lab | cd .. | pwd | clear"); return; }
+  if(c==="clear"){ return "__CLEAR__"; }
+  if(c==="pwd"){ write(cwd==="home"?"<b>/home/lab</b>":"<b>/home/lab/lab</b>","ok"); return; }
+  if(c==="cd lab"||c==="cd ~/lab"||c==="cd ./lab"){
+    if(cwd==="lab"){ write("already in lab","err"); return; }
+    S.cwd.nav="lab"; save();
+    box.querySelector(".ps").textContent="lab@shell:~/lab$";
+    write(""); // empty success
+    mark(conf,c,taskEls,"cd");
+    return;
+  }
+  if(c==="cd .."||c==="cd ~"||c==="cd"){
+    S.cwd.nav="home"; save();
+    box.querySelector(".ps").textContent="lab@shell:~$";
+    write("");
+    return;
+  }
+  if(c==="ls"||c==="ls -la"||c==="ls -l"||c==="ls -al"){
+    if(cwd==="home"){
+      write(c.indexOf("-l")>=0
+        ? "drwxr-xr-x  lab lab  <b>lab</b>\n-rw-r--r--  lab lab  README"
+        : "<b>lab</b>  README","ok");
+      mark(conf,c,taskEls,"ls");
+    } else {
+      write(c.indexOf("-l")>=0
+        ? "drwxr-xr-x  lab lab  .hidden\n-rw-r--r--  lab lab  auth.log\n-rw-r--r--  lab lab  notes.txt\n-rw-r--r--  lab lab  tool.sh"
+        : "auth.log  notes.txt  tool.sh  .hidden","ok");
+      mark(conf,c,taskEls,"lslab");
+    }
+    return;
+  }
+  write("command not found: "+esc(raw)+" — try <span class=\"hi\">help</span>","err");
+}
+
+function mark(conf,c,taskEls,only){
+  var id=conf._id;
+  Object.keys(conf.tasks||{}).forEach(function(tid){
+    if(only && tid!==only) return;
+    var alts=conf.tasks[tid].map(norm);
+    if(alts.indexOf(c)!==-1){
+      S.term[id].done[tid]=1; save();
+      if(taskEls[tid]) taskEls[tid].classList.add("done");
+    }
+  });
+}
+
+document.querySelectorAll(".termx").forEach(function(box){
+  var id=box.getAttribute("data-id");
+  var conf=TERMX[id]; if(!conf) return;
+  conf._id=id;
+  var out=box.querySelector(".termx-out");
+  var form=box.querySelector(".termx-in");
+  var input=form.querySelector("input");
+  var hint=box.querySelector(".termx-hint");
+  var taskEls={};
+  box.querySelectorAll(".termx-tasks [data-task]").forEach(function(li){ taskEls[li.getAttribute("data-task")]=li; });
+  if(!S.term[id]) S.term[id]={done:{}};
+  Object.keys(S.term[id].done||{}).forEach(function(t){ if(taskEls[t]) taskEls[t].classList.add("done"); });
+
+  function write(html, cls){
+    var line=document.createElement("div");
+    if(cls) line.className=cls;
+    line.innerHTML=html;
+    out.appendChild(line);
+    out.scrollTop=out.scrollHeight;
+  }
+  write(conf.welcome.replace(/\n/g,"<br>"));
+
+  form.addEventListener("submit",function(e){
+    e.preventDefault();
+    var raw=input.value; var c=norm(raw); input.value="";
+    if(!c) return;
+    write('<span class="cmd">'+esc(box.querySelector(".ps").textContent)+" "+esc(raw)+"</span>");
+
+    if(conf.dynamic){
+      var r=navHandle(box,conf,c,raw,write,taskEls);
+      if(r==="__CLEAR__"){ out.innerHTML=""; write(conf.welcome.replace(/\n/g,"<br>")); }
+      if(hint) hint.hidden=true;
+      return;
+    }
+
+    var resp=null;
+    Object.keys(conf.cmds).forEach(function(k){ if(norm(k)===c) resp=conf.cmds[k]; });
+    // case-insensitive grep Failed
+    if(resp==null && id==="pipes"){
+      Object.keys(conf.cmds).forEach(function(k){ if(norm(k)===c) resp=conf.cmds[k]; });
+    }
+    if(resp==null){
+      write("command not found: "+esc(raw)+" — try <span class=\"hi\">help</span>","err");
+      if(hint){ hint.hidden=false; hint.textContent="Hint: type help for allowed commands in this mission."; }
+      return;
+    }
+    if(resp==="__CLEAR__"){ out.innerHTML=""; write(conf.welcome.replace(/\n/g,"<br>")); return; }
+    if(resp===""){
+      write(conf.after && conf.after[Object.keys(conf.after).filter(function(k){return norm(k)===c;})[0]] || "<span class=\"ok\">ok</span>","ok");
+    } else {
+      write(String(resp).replace(/\n/g,"<br>"),"ok");
+    }
+    mark(conf,c,taskEls);
+    if(hint) hint.hidden=true;
+  });
+});
+
+(function init(){
+  var h=location.hash.slice(1);
+  if(h==="done") return show(LAST,true);
+  var m=/^s(\d+)$/.exec(h);
+  if(m) return show(parseInt(m[1],10),true);
+  show(S.i||0,true);
+})();
+
+var NEXT_LESSON={title:"Cybersecurity essentials",href:"cybersecurity-essentials.html"};
+void NEXT_LESSON;
+})();
+</script>
+
+</body>
+</html>

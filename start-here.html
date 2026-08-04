@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<!-- Cybersecurity Academy — Start Here / campaign builder.
+     Self-contained: no external CSS/JS/fonts/images.
+     Progress key: localStorage csa:progress (xp, badges, cleared, plan).
+     Set LINKS.discord at the bottom of the script. -->
+<html lang="en" data-track="career">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start Here — Cybersecurity Academy</title>
+<meta name="description" content="Build your campaign: 5 taps, personal roadmap, XP, and a path from CyberCore to Job Ready.">
+<style>
+:root{
+  --bg:#08080a;--bg-soft:#0d0d10;--panel:#121216;--panel-2:#17171c;--panel-3:#1d1d23;
+  --line:#232329;--line-soft:#1a1a1f;
+  --ink:#ecedf0;--ink-dim:#a8a9b2;--ink-faint:#71727c;
+  --accent:#8b95ff;--accent-ink:#08080a;
+  --ok:#5fd68a;--warn:#ffb347;--danger:#ff6b57;
+  --t-core:#f5b942;--t-off:#ff6a45;--t-def:#4aa3ff;--t-grc:#2fd6b4;--t-ai:#b183ff;
+  --t-bounty:#6fdc8c;--t-free:#ff7ab6;--t-career:#8b95ff;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --r:12px;--maxw:820px;
+}
+[data-track="offense"]{--accent:#ff6a45}
+[data-track="defense"]{--accent:#4aa3ff}
+[data-track="grc"]{--accent:#2fd6b4}
+[data-track="ai"]{--accent:#b183ff}
+[data-track="career"]{--accent:#8b95ff}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);
+  -webkit-font-smoothing:antialiased;overflow-wrap:break-word}
+body::before{content:"";position:fixed;inset:0 0 auto 0;height:320px;pointer-events:none;z-index:0;
+  background:radial-gradient(110% 320px at 50% -70px,color-mix(in srgb,var(--accent) 15%,transparent),transparent 72%);
+  transition:background .4s ease}
+.wrap{position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:0 16px 130px}
+@media(min-width:600px){.wrap{padding:0 20px 130px}}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+h1,h2,h3,h4{line-height:1.16;margin:0;font-weight:680;letter-spacing:-.02em}
+p{margin:0 0 12px}p:last-child{margin-bottom:0}
+strong{color:#fff;font-weight:650}
+button{font:inherit;color:inherit}
+::selection{background:var(--accent);color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+[hidden]{display:none!important}
+.ic{width:22px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- rail ---------- */
+.pbar{position:fixed;top:0;left:0;right:0;z-index:60;height:3px;background:var(--line-soft)}
+.pbar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s ease}
+.rail{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line-soft);
+  margin:0 -16px 24px;padding:11px 16px}
+@media(min-width:600px){.rail{margin:0 -20px 24px;padding:11px 20px}}
+.rail .in{display:flex;align-items:center;gap:12px;max-width:calc(var(--maxw) - 32px);margin:0 auto}
+.rail .ct{font:11px/1 var(--mono);letter-spacing:.07em;color:var(--ink-faint);white-space:nowrap}
+.rail .ct b{color:var(--ink)}
+.dots{display:flex;gap:5px;flex:1;min-width:0}
+.dot{flex:1;height:5px;min-width:9px;border-radius:99px;background:var(--line);border:0;padding:0;cursor:pointer}
+.dot[data-state="active"]{background:var(--accent)}
+.dot[data-state="done"]{background:color-mix(in srgb,var(--ok) 70%,transparent)}
+
+/* ---------- HUD (XP / rank) ---------- */
+.hud{display:flex;align-items:center;gap:10px;margin:0 0 18px;padding:10px 12px;
+  background:var(--panel);border:1px solid var(--line);border-radius:11px}
+.hud .rank{font:10.5px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent);white-space:nowrap;flex:none}
+.hud .xpwrap{flex:1;min-width:0}
+.hud .xpmeta{display:flex;justify-content:space-between;gap:8px;margin:0 0 5px;
+  font:10.5px/1 var(--mono);color:var(--ink-faint)}
+.hud .xpmeta b{color:var(--ink);font-weight:600}
+.hud .xpbar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.hud .xpbar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .35s ease;
+  border-radius:99px}
+.hud .badge{font:9.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  padding:5px 7px;border-radius:99px;border:1px solid color-mix(in srgb,var(--ok) 45%,var(--line));
+  color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent);white-space:nowrap;flex:none}
+.xptoast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(12px);
+  z-index:70;padding:10px 14px;border-radius:10px;background:var(--panel-2);border:1px solid var(--accent);
+  font:12.5px/1.3 var(--mono);color:var(--ink);opacity:0;pointer-events:none;
+  transition:opacity .25s ease,transform .25s ease;white-space:nowrap;max-width:calc(100vw - 32px)}
+.xptoast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.gate{display:flex;gap:12px;align-items:flex-start;border:1px solid color-mix(in srgb,var(--ok) 50%,var(--line));
+  border-radius:12px;background:color-mix(in srgb,var(--ok) 8%,var(--panel));padding:14px;margin:0 0 16px}
+.gate .sq{width:38px;height:38px;border-radius:10px;background:var(--ok);color:#04140a;
+  display:flex;align-items:center;justify-content:center;flex:none}
+.gate .kk{display:block;font:10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ok);margin-bottom:5px}
+.gate .t{display:block;font-weight:660;font-size:15.5px;color:var(--ink)}
+.gate .d{display:block;color:var(--ink-faint);font-size:13px;margin-top:3px}
+.acts{display:grid;gap:8px;margin:0 0 16px}
+.act{display:flex;gap:12px;align-items:center;padding:12px 13px;border:1px solid var(--line);
+  border-radius:11px;background:var(--panel)}
+.act .n{font:11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);flex:none}
+.act .tx{min-width:0;flex:1}
+.act .t{display:block;font-weight:650;font-size:14.5px}
+.act .d{display:block;font-size:12.5px;color:var(--ink-faint);margin-top:2px}
+.act.lock{opacity:.55}
+.act.job{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+
+/* ---------- screens ---------- */
+.scr{animation:in .24s ease}
+@keyframes in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+/* ---------- hero ---------- */
+.hero{padding:14px 0 0}
+.crumb{font:12px/1.4 var(--mono);color:var(--ink-faint);letter-spacing:.05em;margin:0 0 18px}
+.crumb b{color:var(--accent);font-weight:500}
+h1.title{font-size:clamp(32px,8.6vw,56px);margin:0 0 16px;letter-spacing:-.035em}
+h1.title em{font-style:normal;color:var(--accent)}
+.sub{font-size:clamp(16px,2.6vw,19px);color:var(--ink-dim);max-width:44ch;margin:0 0 24px}
+.outrow{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 26px;padding:0;list-style:none}
+.oc{display:flex;align-items:center;gap:6px;font:10.5px/1 var(--mono);letter-spacing:.09em;
+  text-transform:uppercase;padding:7px 10px;border-radius:99px;
+  border:1px solid color-mix(in srgb,var(--accent) 42%,var(--line));
+  background:color-mix(in srgb,var(--accent) 11%,transparent);
+  color:color-mix(in srgb,var(--accent) 82%,#fff);white-space:nowrap}
+.oc .ic{width:13px;height:13px}
+
+/* ---------- tiles ---------- */
+.tiles{display:grid;gap:8px;grid-template-columns:1fr 1fr;margin:0 0 16px}
+@media(min-width:620px){.tiles.c3{grid-template-columns:repeat(3,1fr)}
+  .tiles.c4{grid-template-columns:repeat(4,1fr)}}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px}
+.tile .v{font:21px/1.1 var(--sans);font-weight:700;letter-spacing:-.03em;color:var(--ink);display:block}
+.tile .v.mono{font-family:var(--mono);font-size:15px;letter-spacing:0}
+.tile .l{font:10px/1.3 var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--ink-faint);
+  display:block;margin-top:6px}
+.tile.acc{border-color:color-mix(in srgb,var(--accent) 42%,var(--line));
+  background:color-mix(in srgb,var(--accent) 7%,var(--panel))}
+.tile.acc .v{color:var(--accent)}
+
+/* ---------- questions ---------- */
+.qhead{margin:0 0 20px}
+.qhead .kk{font:10.5px/1 var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--accent);
+  display:block;margin-bottom:11px}
+.qhead h2{font-size:clamp(23px,5.4vw,33px);margin:0 0 8px}
+.qhead .why{font:12px/1.5 var(--mono);color:var(--ink-faint);margin:0}
+.opts{display:grid;gap:9px;grid-template-columns:1fr}
+@media(min-width:620px){.opts.two{grid-template-columns:1fr 1fr}}
+.op{display:flex;gap:13px;align-items:flex-start;text-align:left;width:100%;padding:15px;
+  border:1px solid var(--line);border-radius:12px;background:var(--panel);cursor:pointer;
+  transition:border-color .15s,background .15s}
+.op:hover{background:var(--panel-2);border-color:var(--ink-faint)}
+.op[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--panel))}
+.op .sq{flex:none;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;background:var(--panel-3);color:var(--ink-dim);border:1px solid var(--line)}
+.op[aria-pressed="true"] .sq{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.op .tx{min-width:0}
+.op .n{display:block;font-weight:660;font-size:16px;color:var(--ink)}
+.op .d{display:block;color:var(--ink-faint);font-size:13.5px;margin-top:3px}
+.op .fl{display:inline-block;font:9.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 40%,var(--line));border-radius:99px;
+  padding:3px 6px;margin-top:8px}
+
+/* ---------- map ---------- */
+.tier{margin:0 0 4px}
+.tier .tl{font:10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 8px}
+.boxes{display:grid;gap:8px;grid-template-columns:1fr}
+@media(min-width:560px){.t4 .boxes{grid-template-columns:1fr 1fr}}
+@media(min-width:720px){.t4 .boxes{grid-template-columns:repeat(4,1fr)}
+  .t3 .boxes{grid-template-columns:repeat(3,1fr)}.t2 .boxes{grid-template-columns:repeat(2,1fr)}}
+.mb{border:1px solid var(--line);border-top:2px solid var(--c,var(--line));border-radius:9px;
+  background:var(--panel);padding:11px 12px}
+.mb .n{font-weight:650;font-size:14px;color:var(--ink);display:block}
+.mb .s{font:10.5px/1.45 var(--mono);color:var(--ink-faint);margin-top:4px;display:block}
+.mb.core{--c:var(--t-core)}.mb.off{--c:var(--t-off)}.mb.def{--c:var(--t-def)}.mb.grc{--c:var(--t-grc)}
+.mb.ai{--c:var(--t-ai)}.mb.bounty{--c:var(--t-bounty)}.mb.free{--c:var(--t-free)}.mb.career{--c:var(--t-career)}
+.down{text-align:center;color:var(--line);font:13px/1 var(--mono);margin:2px 0 8px;letter-spacing:.4em}
+.slabel{display:flex;align-items:center;gap:11px;font:10.5px/1 var(--mono);letter-spacing:.17em;
+  text-transform:uppercase;color:var(--ink-faint);margin:32px 0 15px}
+.slabel::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* index groups */
+.grp{border:1px solid var(--line);border-radius:11px;background:var(--panel);margin:0 0 8px;overflow:hidden}
+.grp>summary{cursor:pointer;list-style:none;padding:13px 14px;display:flex;align-items:center;gap:10px}
+.grp>summary::-webkit-details-marker{display:none}
+.grp>summary:hover{background:var(--panel-2)}
+.grp .dt{width:7px;height:7px;border-radius:50%;background:var(--c,var(--line));flex:none}
+.grp .gn{font-weight:650;font-size:15px;flex:1}
+.grp .gc{font:10.5px/1 var(--mono);color:var(--ink-faint)}
+.grp.core{--c:var(--t-core)}.grp.off{--c:var(--t-off)}.grp.def{--c:var(--t-def)}.grp.grc{--c:var(--t-grc)}
+.grp.ai{--c:var(--t-ai)}.grp.bounty{--c:var(--t-bounty)}.grp.free{--c:var(--t-free)}.grp.career{--c:var(--t-career)}
+.grp ul{margin:0;padding:12px 14px 13px;list-style:none;border-top:1px solid var(--line-soft)}
+.grp li{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;margin:0 0 8px;font-size:14.5px}
+.grp li:last-child{margin:0}
+.off2{color:var(--ink-faint)}
+.soon{font:9.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);
+  border:1px solid var(--line);border-radius:99px;padding:4px 6px;white-space:nowrap}
+
+/* ---------- plan ---------- */
+.pdone{display:flex;align-items:center;gap:11px;margin:0 0 16px}
+.pdone .ring{width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
+  display:flex;align-items:center;justify-content:center;flex:none}
+.pdone .kk{font:10.5px/1 var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint);
+  display:block;margin-bottom:5px}
+.pdone h2{font-size:clamp(23px,5.6vw,32px)}
+.reason{background:var(--bg-soft);border-left:2px solid var(--accent);border-radius:0 10px 10px 0;
+  padding:12px 14px;margin:0 0 18px;font-size:14.5px;color:var(--ink-dim)}
+.reason b{color:var(--ink)}
+
+.phase{position:relative;padding:0 0 4px 26px;margin:0 0 16px}
+.phase::before{content:"";position:absolute;left:6px;top:22px;bottom:6px;width:1px;background:var(--line)}
+.phase:last-of-type::before{display:none}
+.phase>.pn{position:absolute;left:0;top:5px;width:13px;height:13px;border-radius:50%;
+  background:var(--bg);border:2px solid var(--accent)}
+.phase.later>.pn{border-color:var(--line)}
+.phase .ph{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:0 0 10px}
+.phase .ph .t{font-weight:660;font-size:16.5px}
+.phase .ph .w{font:10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint);
+  border:1px solid var(--line);border-radius:99px;padding:4px 7px}
+.plist{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.pg{display:flex;gap:11px;align-items:center;background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;padding:11px 12px;font-size:14.5px}
+.pg .i{font:10.5px/1 var(--mono);color:var(--ink-faint);flex:none;min-width:17px}
+.pg .nm{flex:1;min-width:0;color:var(--ink)}
+.pg .nm.off2{color:var(--ink-faint)}
+.pg .hr{font:10.5px/1 var(--mono);color:var(--ink-faint);flex:none}
+.pg.first{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
+.pg.first .i{color:var(--accent)}
+.pg.skip{opacity:.55}
+
+.big{display:flex;gap:14px;align-items:center;border:1px solid var(--accent);border-radius:13px;
+  background:color-mix(in srgb,var(--accent) 10%,var(--panel));padding:17px;margin:0 0 10px;color:var(--ink)}
+.big:hover{text-decoration:none;background:color-mix(in srgb,var(--accent) 15%,var(--panel))}
+.big .sq{width:42px;height:42px;border-radius:11px;background:var(--accent);color:var(--accent-ink);
+  display:flex;align-items:center;justify-content:center;flex:none}
+.big .kk{display:block;font:10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:6px}
+.big .t{display:block;font-weight:670;font-size:17px}
+.big .d{display:block;color:var(--ink-faint);font-size:13.5px;margin-top:3px}
+.big .go{margin-left:auto;color:var(--accent);flex:none}
+
+.ncards{display:grid;gap:9px;grid-template-columns:1fr}
+@media(min-width:640px){.ncards{grid-template-columns:1fr 1fr}}
+.ncard{display:block;border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:15px;color:var(--ink)}
+.ncard:hover{border-color:var(--accent);text-decoration:none;background:var(--panel-2)}
+.ncard .k{font:10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+  display:block;margin-bottom:8px}
+.ncard .t{font-weight:650;font-size:15.5px;display:block}
+.ncard .d{color:var(--ink-faint);font-size:13.5px;margin-top:4px;display:block}
+.ncard.back .k{color:var(--ink-faint)}
+.ncard.soon{opacity:.5;cursor:not-allowed}
+.ncard.soon:hover{border-color:var(--line);background:var(--panel)}
+.ncard.soon .k{color:var(--ink-faint)}
+.ncard.dc{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+
+.msg{background:#050507;border:1px solid var(--line);border-radius:10px;padding:12px;
+  font:12.5px/1.65 var(--mono);color:var(--ink-dim);white-space:pre-wrap;margin:0 0 9px}
+.rowbtn{display:flex;flex-wrap:wrap;gap:8px}
+
+.note{border-left:2px solid var(--accent);background:var(--bg-soft);padding:11px 13px;
+  border-radius:0 9px 9px 0;margin:0 0 14px;font-size:14px;color:var(--ink-dim)}
+.note.tip{border-left-color:var(--ok)}
+.note.legal{border-left-color:var(--danger)}
+.note.legal b{color:var(--danger)}
+.note .lb{display:block;font:10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-faint);margin-bottom:6px}
+details.more{border:1px solid var(--line);border-radius:10px;background:var(--bg-soft);margin:0 0 12px}
+details.more>summary{cursor:pointer;list-style:none;padding:12px 13px;font:11.5px/1.4 var(--mono);
+  color:var(--ink-dim)}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"▸ "}
+details.more[open]>summary::before{content:"▾ "}
+details.more .in{padding:0 13px 13px;font-size:14.5px;color:var(--ink-dim)}
+.tw{overflow-x:auto;margin:0 0 12px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:480px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:10px/1.3 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+td{color:var(--ink-dim)}td strong{color:var(--ink)}
+code.inl{font:.88em var(--mono);background:var(--panel-2);border:1px solid var(--line);border-radius:5px;
+  padding:1.5px 5px;color:var(--ink)}
+
+/* ---------- nav ---------- */
+.lnav{position:sticky;bottom:0;z-index:45;display:flex;margin:26px -16px 0;padding:12px 16px;
+  background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line-soft)}
+@media(min-width:600px){.lnav{margin:26px -20px 0;padding:14px 20px}}
+.lnav .in{display:flex;gap:9px;align-items:center;width:100%;max-width:calc(var(--maxw) - 32px);margin:0 auto}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:12px 17px;cursor:pointer;
+  border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:14.5px;font-weight:620;
+  white-space:nowrap}
+.btn:hover{background:var(--panel-2);border-color:var(--ink-faint)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{filter:brightness(1.08);background:var(--accent)}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.32;cursor:not-allowed}
+.btn.sm{padding:9px 12px;font-size:13px;font-weight:600}
+.lnav .sp{flex:1}
+footer.page{margin-top:32px;border-top:1px solid var(--line);padding-top:18px;color:var(--ink-faint);
+  font:11.5px/1.6 var(--mono);letter-spacing:.03em;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-job" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></symbol>
+<symbol id="i-free" viewBox="0 0 24 24"><path d="M12 3v18M8 7h6a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h6"/></symbol>
+<symbol id="i-bounty" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></symbol>
+<symbol id="i-zero" viewBox="0 0 24 24"><path d="M9 4h6l1 4H8l1-4ZM8 8h8v6a4 4 0 0 1-8 0V8ZM4 12h4M16 12h4M5 17l3-2M19 17l-3-2"/></symbol>
+<symbol id="i-off" viewBox="0 0 24 24"><path d="M20 4 9 15M20 4v5M20 4h-5M4 20l5-5M4 20h5M4 20v-5"/><circle cx="7" cy="17" r="3"/></symbol>
+<symbol id="i-def" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3Z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-grc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></symbol>
+<symbol id="i-ai" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M11 3v4M13 3v4M11 17v4M13 17v4M3 11h4M3 13h4M17 11h4M17 13h4"/></symbol>
+<symbol id="i-seed" viewBox="0 0 24 24"><path d="M12 21V11M12 11C12 7 9 4 5 4c0 4 3 7 7 7ZM12 11c0-4 3-7 7-7 0 4-3 7-7 7Z"/></symbol>
+<symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+<symbol id="i-code" viewBox="0 0 24 24"><path d="M9 8l-5 4 5 4M15 8l5 4-5 4"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 9h13l-3-3M20 15H7l3 3"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v4.5l3 2"/></symbol>
+<symbol id="i-fast" viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-11h-6l1-7Z"/></symbol>
+<symbol id="i-nocode" viewBox="0 0 24 24"><path d="M4 4l16 16"/><path d="M9 8l-5 4 3 2.4M15 8l5 4-3 2.4"/></symbol>
+<symbol id="i-deep" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5 21 21M11 8v6M8 11h6"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M4 18l5-6 4 3 7-9"/><path d="M15 6h5v5"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="2.2"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2ZM9 4v14M15 6v14"/></symbol>
+<symbol id="i-disc" viewBox="0 0 24 24"><path d="M8 6c3-1 5-1 8 0 2 3 3 7 2.5 11-2 1.5-4 2-4 2l-1-2M8 6C6 9 5 13 5.5 17c2 1.5 4 2 4 2l1-2M9.5 17h5"/><path d="M9.5 12.5h.01M14.5 12.5h.01"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h9"/></symbol>
+<symbol id="i-xp" viewBox="0 0 24 24"><path d="M12 3l2.2 6.6H21l-5.4 4 2.1 6.4L12 16.8 6.3 20l2.1-6.4L3 9.6h6.8L12 3Z"/></symbol>
+</defs></svg>
+
+<div class="pbar" aria-hidden="true"><i></i></div>
+<div class="xptoast" id="xpToast" role="status" aria-live="polite"></div>
+
+<div class="wrap">
+
+<nav class="rail" aria-label="Progress">
+  <div class="in">
+    <span class="ct" id="ctr">Start</span>
+    <div class="dots" id="dots"></div>
+  </div>
+</nav>
+
+<div class="hud" id="hud" aria-label="Player progress">
+  <span class="rank" id="hudRank">Recruit</span>
+  <div class="xpwrap">
+    <div class="xpmeta"><span>XP <b id="hudXp">0</b></span><span id="hudNext">50 to Initiate</span></div>
+    <div class="xpbar" aria-hidden="true"><i id="hudBar"></i></div>
+  </div>
+  <span class="badge" id="hudBadge" hidden>+ badge</span>
+</div>
+
+<!-- ============================ 0. HERO ============================ -->
+<section class="scr" id="s0">
+  <div class="hero">
+    <p class="crumb">~ <b>start-here</b> // campaign setup</p>
+    <h1 class="title">Clear levels.<br>Get <em>Job Ready</em>.</h1>
+    <p class="sub">Five taps → your track, level order, and dates. Then you play CyberCore → Offense → apply in Discord.</p>
+
+    <div class="acts">
+      <div class="act"><span class="n">Act 1</span><span class="tx"><span class="t">CyberCore</span><span class="d">4 foundation levels · bash fluency</span></span></div>
+      <div class="act"><span class="n">Act 2</span><span class="tx"><span class="t">Your track</span><span class="d">Offense by default · labs unlock Next</span></span></div>
+      <div class="act job"><span class="n">Gate</span><span class="tx"><span class="t">Job Ready</span><span class="d">Apply via Discord · keep leveling after</span></span></div>
+    </div>
+
+    <div class="tiles c4">
+      <div class="tile acc"><span class="v">+50</span><span class="l">XP for setup</span></div>
+      <div class="tile"><span class="v">4</span><span class="l">tracks</span></div>
+      <div class="tile"><span class="v">0</span><span class="l">videos</span></div>
+      <div class="tile"><span class="v mono">~60s</span><span class="l">to start</span></div>
+    </div>
+
+    <div class="note legal">
+      <span class="lb">Rule</span>
+      <p><b>Authorized targets only</b> — your lab, a vulnerable app you installed, or a bounty program whose scope you read.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 1. OUTCOME ============================ -->
+<section class="scr" id="s1" data-q="goal" data-label="Goal" hidden>
+  <div class="qhead">
+    <span class="kk">Question 1 of 5</span>
+    <h2>What do you want out of this?</h2>
+    <p class="why">Pick one. This decides the last third of your roadmap.</p>
+  </div>
+  <div class="opts two">
+    <button class="op" type="button" data-v="job" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-job"/></svg></span>
+      <span class="tx"><span class="n">Get hired</span><span class="d">SOC analyst, pentester, GRC analyst, AppSec</span></span>
+    </button>
+    <button class="op" type="button" data-v="bounty" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-bounty"/></svg></span>
+      <span class="tx"><span class="n">Bug bounty</span><span class="d">Paid findings on authorized programs</span></span>
+    </button>
+    <button class="op" type="button" data-v="freelance" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-free"/></svg></span>
+      <span class="tx"><span class="n">Freelance</span><span class="d">Your own clients, scoped security work</span></span>
+    </button>
+    <button class="op" type="button" data-v="research" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-zero"/></svg></span>
+      <span class="tx"><span class="n">Vuln research</span><span class="d">Find and disclose new bugs<span class="fl">longest road</span></span></span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================ 2. LEVEL ============================ -->
+<section class="scr" id="s2" data-q="level" data-label="Level" hidden>
+  <div class="qhead">
+    <span class="kk">Question 2 of 5</span>
+    <h2>Where are you starting from?</h2>
+    <p class="why">Sets how fast you move through foundations.</p>
+  </div>
+  <div class="opts two">
+    <button class="op" type="button" data-v="new" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-seed"/></svg></span>
+      <span class="tx"><span class="n">Total beginner</span><span class="d">New to IT and security both</span></span>
+    </button>
+    <button class="op" type="button" data-v="it" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-server"/></svg></span>
+      <span class="tx"><span class="n">Some IT</span><span class="d">Helpdesk, sysadmin, networking, cloud</span></span>
+    </button>
+    <button class="op" type="button" data-v="dev" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-code"/></svg></span>
+      <span class="tx"><span class="n">I write code</span><span class="d">Dev or scripting background</span></span>
+    </button>
+    <button class="op" type="button" data-v="switch" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-swap"/></svg></span>
+      <span class="tx"><span class="n">Career switcher</span><span class="d">From a non-technical field</span></span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================ 3. VIBE ============================ -->
+<section class="scr" id="s3" data-q="vibe" data-label="Style" hidden>
+  <div class="qhead">
+    <span class="kk">Question 3 of 5</span>
+    <h2>Which would you do for six hours straight?</h2>
+    <p class="why">Answer for what you enjoy, not what sounds impressive. This picks your track.</p>
+  </div>
+  <div class="opts">
+    <button class="op" type="button" data-v="break" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-off"/></svg></span>
+      <span class="tx"><span class="n">Poke at an app until it does something it shouldn't</span>
+      <span class="d">Breaking things and proving how</span></span>
+    </button>
+    <button class="op" type="button" data-v="hunt" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-def"/></svg></span>
+      <span class="tx"><span class="n">Dig through logs to reconstruct what happened</span>
+      <span class="d">Catching things, investigating, timelines</span></span>
+    </button>
+    <button class="op" type="button" data-v="process" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-grc"/></svg></span>
+      <span class="tx"><span class="n">Read a process and find where it fails</span>
+      <span class="d">Risk, controls, audits, policy</span></span>
+    </button>
+    <button class="op" type="button" data-v="ai" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-ai"/></svg></span>
+      <span class="tx"><span class="n">Talk a model into misbehaving</span>
+      <span class="d">Attacking and defending AI systems</span></span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================ 4. HOURS ============================ -->
+<section class="scr" id="s4" data-q="hours" data-label="Pace" hidden>
+  <div class="qhead">
+    <span class="kk">Question 4 of 5</span>
+    <h2>Realistic hours per week?</h2>
+    <p class="why">Be honest — every date in your plan is calculated from this.</p>
+  </div>
+  <div class="opts two">
+    <button class="op" type="button" data-v="3" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-clock"/></svg></span>
+      <span class="tx"><span class="n">2–5 hrs</span><span class="d">Evenings, when life allows</span></span>
+    </button>
+    <button class="op" type="button" data-v="7" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-clock"/></svg></span>
+      <span class="tx"><span class="n">5–10 hrs</span><span class="d">A weeknight habit plus weekends</span></span>
+    </button>
+    <button class="op" type="button" data-v="14" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-clock"/></svg></span>
+      <span class="tx"><span class="n">10–20 hrs</span><span class="d">Serious side commitment</span></span>
+    </button>
+    <button class="op" type="button" data-v="25" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-clock"/></svg></span>
+      <span class="tx"><span class="n">20+ hrs</span><span class="d">This is my main thing right now</span></span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================ 5. CONSTRAINT ============================ -->
+<section class="scr" id="s5" data-q="need" data-label="Priority" hidden>
+  <div class="qhead">
+    <span class="kk">Question 5 of 5</span>
+    <h2>What matters most in the next 12 months?</h2>
+    <p class="why">Breaks the tie if two tracks fit you equally.</p>
+  </div>
+  <div class="opts two">
+    <button class="op" type="button" data-v="fast" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-fast"/></svg></span>
+      <span class="tx"><span class="n">Employed as fast as possible</span><span class="d">Volume of openings beats prestige</span></span>
+    </button>
+    <button class="op" type="button" data-v="nocode" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-nocode"/></svg></span>
+      <span class="tx"><span class="n">Minimal coding</span><span class="d">I'd rather not live in a terminal</span></span>
+    </button>
+    <button class="op" type="button" data-v="deep" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-deep"/></svg></span>
+      <span class="tx"><span class="n">Deep technical skill</span><span class="d">Even if hiring takes longer</span></span>
+    </button>
+    <button class="op" type="button" data-v="upskill" aria-pressed="false">
+      <span class="sq"><svg class="ic"><use href="#i-up"/></svg></span>
+      <span class="tx"><span class="n">Level up where I am</span><span class="d">Already working, want more range</span></span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================ 6. PLAN ============================ -->
+<section class="scr" id="s6" hidden>
+  <div class="pdone">
+    <span class="ring"><svg class="ic"><use href="#i-check"/></svg></span>
+    <span><span class="kk">Campaign locked in</span><h2 id="planTitle">Offense track</h2></span>
+  </div>
+
+  <div class="tiles c4" id="planTiles"></div>
+  <div class="reason" id="planWhy"></div>
+
+  <div class="gate" id="jobGate">
+    <span class="sq"><svg class="ic"><use href="#i-job"/></svg></span>
+    <span>
+      <span class="kk">Job gate</span>
+      <span class="t">After CyberCore + your track → apply in Discord</span>
+      <span class="d">Advanced modules stay open after that — they don't block your first applications.</span>
+    </span>
+  </div>
+
+  <h2 class="slabel">Level order</h2>
+  <div id="planPhases"></div>
+
+  <h2 class="slabel">Start level 1</h2>
+  <a class="big" id="planNext" href="#">
+    <span class="sq"><svg class="ic"><use href="#i-arrow"/></svg></span>
+    <span><span class="kk">First mission</span><span class="t" id="planNextT">—</span>
+    <span class="d" id="planNextD">—</span></span>
+    <span class="go"><svg class="ic"><use href="#i-arrow"/></svg></span>
+  </a>
+
+  <h2 class="slabel">Discord intro</h2>
+  <div class="msg" id="dcMsg">—</div>
+  <div class="rowbtn" style="margin-bottom:14px">
+    <button class="btn sm" type="button" id="copyMsg"><svg class="ic" style="width:15px;height:15px"><use href="#i-copy"/></svg> Copy intro</button>
+    <button class="btn sm" type="button" id="copyPlan"><svg class="ic" style="width:15px;height:15px"><use href="#i-copy"/></svg> Copy plan</button>
+  </div>
+  <div class="ncards">
+    <a class="ncard dc" id="dcLink" href="#">
+      <span class="k">Community</span>
+      <span class="t">Unlock on Discord</span>
+      <span class="d">Jobs · mentors · gated labs — join to unlock</span>
+    </a>
+    <button class="ncard back" type="button" id="showMap" style="text-align:left;cursor:pointer">
+      <span class="k">Browse</span>
+      <span class="t">Full map</span>
+      <span class="d">Every act and level, including soon</span>
+    </button>
+  </div>
+
+  <h2 class="slabel">Dates</h2>
+  <div id="planMiles"></div>
+
+  <details class="more">
+    <summary>What clears each bar</summary>
+    <div class="in">
+      <p><strong>Beginner:</strong> shell without googling every flag · one attack you ran yourself.</p>
+      <p><strong>Job Ready:</strong> Core + track missions cleared · resume/portfolio · unlock Discord & apply.</p>
+      <p><strong>Specialist:</strong> any advanced tree (bounty / defense / research) after the job gate.</p>
+    </div>
+  </details>
+
+  <div class="rowbtn" style="margin-top:16px">
+    <button class="btn sm ghost" type="button" id="redo">↺ Redo setup</button>
+  </div>
+</section>
+
+<!-- ============================ 7. MAP ============================ -->
+<section class="scr" id="s7" hidden>
+  <div class="pdone">
+    <span class="ring"><svg class="ic"><use href="#i-map"/></svg></span>
+    <span><span class="kk">Campaign map</span><h2>Acts &amp; levels</h2></span>
+  </div>
+
+  <div class="acts">
+    <div class="act"><span class="n">Act 1</span><span class="tx"><span class="t">CyberCore</span><span class="d">Networking · Linux · Sec essentials · Secure Java</span></span></div>
+    <div class="act"><span class="n">Act 2</span><span class="tx"><span class="t">Track</span><span class="d">Offense · Defense · GRC · AI</span></span></div>
+    <div class="act job"><span class="n">Gate</span><span class="tx"><span class="t">Job Ready</span><span class="d">Discord jobs · resume · interviews</span></span></div>
+    <div class="act lock"><span class="n">Act 3</span><span class="tx"><span class="t">Advanced trees</span><span class="d">Bounty · Freelance · Exploit · Research</span></span></div>
+  </div>
+
+  <div class="tier">
+    <p class="tl">Act 1 — foundations</p>
+    <div class="t4"><div class="boxes">
+      <div class="mb core"><span class="n">Networking</span><span class="s">packets · paths</span></div>
+      <div class="mb core"><span class="n">Linux CLI</span><span class="s">shell CTF</span></div>
+      <div class="mb core"><span class="n">Sec Essentials</span><span class="s">kill chain</span></div>
+      <div class="mb core"><span class="n">Secure Java</span><span class="s">fix the code</span></div>
+    </div></div>
+  </div>
+  <p class="down">↓ ↓ ↓ ↓</p>
+  <div class="tier">
+    <p class="tl">Act 2 — pick a track</p>
+    <div class="t4"><div class="boxes">
+      <div class="mb off"><span class="n">Offense</span><span class="s">web → AD → evasion</span></div>
+      <div class="mb def"><span class="n">Defense</span><span class="s">SOC → hunt</span></div>
+      <div class="mb grc"><span class="n">GRC</span><span class="s">risk → audit</span></div>
+      <div class="mb ai"><span class="n">AI Security</span><span class="s">LLM red team</span></div>
+    </div></div>
+  </div>
+  <p class="down">↓ job gate ↓</p>
+  <div class="tier">
+    <p class="tl">After Job Ready — optional trees</p>
+    <div class="t3"><div class="boxes">
+      <div class="mb bounty"><span class="n">Bug Bounty</span><span class="s">side income</span></div>
+      <div class="mb free"><span class="n">Freelancing</span><span class="s">clients</span></div>
+      <div class="mb off"><span class="n">Vuln Research</span><span class="s">advanced</span></div>
+    </div></div>
+  </div>
+
+  <h2 class="slabel">Every level</h2>
+  <div id="idx"></div>
+</section>
+
+<!-- ============================ NAV ============================ -->
+<div class="lnav">
+  <div class="in">
+    <button class="btn ghost" id="prev" type="button" hidden>← Back</button>
+    <span class="sp"></span>
+    <button class="btn ghost sm" id="skip" type="button">Skip to map</button>
+    <button class="btn pri" id="next" type="button">Start campaign →</button>
+  </div>
+</div>
+
+<footer class="page">
+  Cybersecurity Academy · Authorized targets only — your own lab, an intentionally vulnerable app,
+  or a program whose scope you've read.
+</footer>
+
+</div><!-- /wrap -->
+
+<script>
+/* ===========================================================================
+   CONFIG — set your real links. Empty = the card renders disabled instead of
+   becoming a dead link.
+   =========================================================================== */
+var LINKS = {
+  discord: "https://whop.com/checkout/3Ugn8Q3jNpHU2kPeEN-0Xm3-uqfq-nck6-mRWOKnNAVQNB/"
+};
+
+/* ===========================================================================
+   CURRICULUM — single source of truth. href:null => not published yet.
+   hrs = realistic hours including labs.
+   =========================================================================== */
+var CORE = [
+  {t:"Networking fundamentals",        h:"cybercore/networking-fundamentals.html",      hrs:4},
+  {t:"Linux command-line essentials",  h:"cybercore/linux-command-line-essentials.html",hrs:4},
+  {t:"Cybersecurity essentials",       h:"cybercore/cybersecurity-essentials.html",     hrs:3},
+  {t:"Secure Java development",        h:"cybercore/secure-java-development.html",      hrs:4, code:true}
+];
+
+var TRACKS = {
+  offense:{
+    name:"Offense", key:"offense", accent:"offense",
+    role:"pentester · AppSec engineer · red teamer",
+    pages:[
+      {t:"Web attacks",                  h:"web-application-security/web-attacks.html",          hrs:6},
+      {t:"Advanced web attacks",         h:"web-application-security/advanced-web-attacks.html", hrs:7},
+      {t:"API security testing",         h:"web-application-security/api-security-testing.html", hrs:6},
+      {t:"Penetration testing",          h:"penetration-testing/penetration-testing.html",       hrs:8},
+      {t:"Network penetration testing",  h:"penetration-testing/network-penetration-testing.html",hrs:7},
+      {t:"Active Directory attacks",     h:"penetration-testing/active-directory-attacks.html",  hrs:8},
+      {t:"Evasion techniques & breach",  h:"penetration-testing/evasion-techniques-breach.html", hrs:5}
+    ]},
+  defense:{
+    name:"Defense", key:"defense", accent:"defense",
+    role:"SOC analyst · IR consultant · detection engineer",
+    pages:[
+      {t:"SOC analyst fundamentals", h:"defensive-security/soc-analyst-fundamentals.html", hrs:5},
+      {t:"Incident response & DFIR", h:"defensive-security/incident-response-dfir.html", hrs:6},
+      {t:"Threat hunting",           h:"defensive-security/threat-hunting.html", hrs:6},
+      {t:"Detection engineering",    h:"defensive-security/detection-engineering.html", hrs:6}
+    ]},
+  grc:{
+    name:"GRC", key:"grc", accent:"grc",
+    role:"GRC analyst · risk analyst · IT auditor",
+    pages:[
+      {t:"GRC fundamentals",      h:"grc/grc-fundamentals.html", hrs:4},
+      {t:"Risk management",       h:"grc/risk-management.html", hrs:5},
+      {t:"Compliance frameworks", h:"grc/compliance-frameworks.html", hrs:5},
+      {t:"Security auditing",     h:"grc/security-auditing.html", hrs:5}
+    ]},
+  ai:{
+    name:"AI Security", key:"ai", accent:"ai",
+    role:"AI security engineer · AI red teamer",
+    pages:[
+      {t:"Web attacks (prerequisite)",     h:"web-application-security/web-attacks.html", hrs:6},
+      {t:"AI & LLM security fundamentals", h:"ai-security/ai-llm-security-fundamentals.html", hrs:5},
+      {t:"AI red teaming",                 h:"ai-security/ai-red-teaming.html", hrs:6}
+    ]}
+};
+
+var GOALS = {
+  job:{name:"Get hired", label:"Job", pages:[
+    {t:"Resume & portfolio for cyber roles", h:"career/resume-portfolio.html", hrs:3},
+    {t:"Interview prep",                     h:"career/interview-prep.html", hrs:3},
+    {t:"Certification roadmap",              h:"career/certification-roadmap.html", hrs:2}]},
+  bounty:{name:"Bug bounty", label:"Bounty", pages:[
+    {t:"Bug bounty fundamentals",        h:"bug-bounty/bug-bounty-fundamentals.html", hrs:3},
+    {t:"Recon & asset discovery",        h:"bug-bounty/recon-asset-discovery.html", hrs:5},
+    {t:"Writing reports that get paid",  h:"bug-bounty/writing-reports.html", hrs:3},
+    {t:"Advanced bounty techniques",     h:"bug-bounty/advanced-bounty-techniques.html", hrs:6}]},
+  freelance:{name:"Freelance", label:"Freelance", pages:[
+    {t:"Getting your first client",     h:"freelancing/first-client.html", hrs:3},
+    {t:"Pricing & contracts",           h:"freelancing/pricing-contracts.html", hrs:3},
+    {t:"Building a portfolio",          h:"freelancing/building-portfolio.html", hrs:3},
+    {t:"Client management & red flags",  h:"freelancing/client-management.html", hrs:2}]},
+  research:{name:"Vuln research", label:"Zero-Day", pages:[
+    {t:"Reverse engineering fundamentals",   h:"vulnerability-research/reverse-engineering-fundamentals.html", hrs:8},
+    {t:"Linux exploitation",                 h:"exploit-development/linux-exploitation.html", hrs:8},
+    {t:"Fuzzing & vulnerability discovery",  h:"vulnerability-research/fuzzing-vulnerability-discovery.html", hrs:7},
+    {t:"Binary exploitation (advanced)",     h:"exploit-development/binary-exploitation-advanced.html", hrs:10},
+    {t:"CVE research & disclosure",          h:"vulnerability-research/cve-research-disclosure.html", hrs:4}]}
+};
+
+var INDEX = [
+  ["core","CyberCore — Foundations", CORE],
+  ["off","Web Application Security", TRACKS.offense.pages.slice(0,3)],
+  ["off","Penetration Testing",      TRACKS.offense.pages.slice(3)],
+  ["career","Career & Jobs",         GOALS.job.pages],
+  ["bounty","Bug Bounty Hunting",    GOALS.bounty.pages],
+  ["free","Freelancing",             GOALS.freelance.pages],
+  ["def","Defensive Security",       TRACKS.defense.pages],
+  ["grc","GRC & Compliance",         TRACKS.grc.pages],
+  ["ai","AI Security",               TRACKS.ai.pages.slice(1)],
+  ["off","Exploit Development & Vuln Research", GOALS.research.pages],
+  ["career","Community unlock", [
+    {t:"Unlock Discord — Job Ready HQ", h:"community/discord-hub.html", hrs:1}
+  ]]
+];
+
+(function(){
+"use strict";
+
+var scrs = [].slice.call(document.querySelectorAll(".scr"));
+var QS   = [].slice.call(document.querySelectorAll(".scr[data-q]"));
+var PLAN = 6, MAP = 7;
+var dotsEl=document.getElementById("dots"), ctrEl=document.getElementById("ctr");
+var prevB=document.getElementById("prev"), nextB=document.getElementById("next"),
+    skipB=document.getElementById("skip"), fillEl=document.querySelector(".pbar > i");
+
+/* ---------- shared progress (XP / badges) — same key future lessons will use ---------- */
+var PROG_KEY="csa:progress";
+var RANKS=[
+  {id:"recruit",  name:"Recruit",   min:0},
+  {id:"initiate", name:"Initiate",  min:50},
+  {id:"operator", name:"Operator",  min:250},
+  {id:"ready",    name:"Job Ready", min:800},
+  {id:"specialist",name:"Specialist",min:1400}
+];
+var PROG={xp:0,badges:[],cleared:[],plan:null};
+try{
+  var pr=localStorage.getItem(PROG_KEY);
+  if(pr) PROG=Object.assign(PROG,JSON.parse(pr));
+  if(!Array.isArray(PROG.badges)) PROG.badges=[];
+  if(!Array.isArray(PROG.cleared)) PROG.cleared=[];
+}catch(e){}
+function saveProg(){try{localStorage.setItem(PROG_KEY,JSON.stringify(PROG));}catch(e){}}
+function rankOf(xp){
+  var r=RANKS[0];
+  for(var i=0;i<RANKS.length;i++){ if(xp>=RANKS[i].min) r=RANKS[i]; }
+  return r;
+}
+function nextRank(xp){
+  for(var i=0;i<RANKS.length;i++){ if(RANKS[i].min>xp) return RANKS[i]; }
+  return null;
+}
+function paintHud(flashBadge){
+  var r=rankOf(PROG.xp), n=nextRank(PROG.xp);
+  var elR=document.getElementById("hudRank"), elX=document.getElementById("hudXp"),
+      elN=document.getElementById("hudNext"), elB=document.getElementById("hudBar"),
+      elBadge=document.getElementById("hudBadge");
+  if(elR) elR.textContent=r.name;
+  if(elX) elX.textContent=String(PROG.xp);
+  if(elN) elN.textContent=n ? ((n.min-PROG.xp)+" to "+n.name) : "max rank";
+  if(elB){
+    var lo=r.min, hi=n?n.min:(r.min+100), pct=n?Math.min(100,((PROG.xp-lo)/(hi-lo))*100):100;
+    elB.style.width=pct+"%";
+  }
+  if(elBadge){
+    if(flashBadge){ elBadge.hidden=false; elBadge.textContent="+ "+flashBadge; }
+    else if(PROG.badges.length){ elBadge.hidden=false; elBadge.textContent=PROG.badges[PROG.badges.length-1]; }
+    else elBadge.hidden=true;
+  }
+}
+function toast(msg){
+  var t=document.getElementById("xpToast");
+  if(!t) return;
+  t.textContent=msg; t.classList.add("on");
+  clearTimeout(toast._t);
+  toast._t=setTimeout(function(){ t.classList.remove("on"); },2200);
+}
+function award(levelId, xp, badge){
+  if(PROG.cleared.indexOf(levelId)!==-1){ paintHud(); return false; }
+  PROG.cleared.push(levelId);
+  PROG.xp+=(xp|0);
+  if(badge && PROG.badges.indexOf(badge)===-1) PROG.badges.push(badge);
+  saveProg();
+  paintHud(badge||null);
+  toast("+"+xp+" XP"+(badge?" · badge: "+badge:""));
+  return true;
+}
+paintHud();
+
+/* ---------- page state ---------- */
+var KEY="csa:start-here";
+var S={i:0,a:{}};
+try{var raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* ---------- dots ---------- */
+QS.forEach(function(q,i){
+  var d=document.createElement("button");
+  d.className="dot"; d.type="button";
+  d.title=q.getAttribute("data-label");
+  d.setAttribute("aria-label",d.title);
+  d.addEventListener("click",function(){ show(i+1); });
+  dotsEl.appendChild(d);
+});
+
+/* ---------- option buttons ---------- */
+QS.forEach(function(q,qi){
+  var key=q.getAttribute("data-q");
+  q.querySelectorAll(".op").forEach(function(op){
+    op.addEventListener("click",function(){
+      q.querySelectorAll(".op").forEach(function(o){o.setAttribute("aria-pressed",String(o===op));});
+      S.a[key]=op.getAttribute("data-v"); save(); paint();
+      setTimeout(function(){ show(qi+2); },200);
+    });
+  });
+});
+
+/* ---------- track scoring ---------- */
+var VIBE_TRACK = {"break":"offense", hunt:"defense", process:"grc", ai:"ai"};
+function decide(a){
+  var s={offense:0,defense:0,grc:0,ai:0};
+  var v=VIBE_TRACK[a.vibe];
+  if(v) s[v]+=4;
+  if(a.goal==="bounty"){s.offense+=2;s.ai+=1;}
+  if(a.goal==="research"){s.offense+=3;}
+  if(a.goal==="job"){s.defense+=1;s.grc+=1;}
+  if(a.goal==="freelance"){s.offense+=1;s.grc+=1;}
+  if(a.need==="fast"){s.defense+=2;s.grc+=2;}
+  if(a.need==="nocode"){s.grc+=3;s.defense+=1;s.offense-=1;}
+  if(a.need==="deep"){s.offense+=2;s.ai+=1;}
+  if(a.level==="dev"){s.offense+=1;s.ai+=1;}
+  if(a.level==="new"||a.level==="switch"){s.defense+=1;s.grc+=1;}
+  var best="offense";
+  Object.keys(s).forEach(function(k){ if(s[k]>s[best]) best=k; });
+  return {track:TRACKS[best], scores:s};
+}
+
+/* ---------- helpers ---------- */
+function wk(n){ var d=new Date(); d.setDate(d.getDate()+Math.round(n*7)); return d; }
+function fmt(d){ return d.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function pagesHTML(list, startIdx, markFirst){
+  return list.map(function(p,i){
+    var n=String(startIdx+i).padStart(2,"0");
+    var cls="pg"+(markFirst&&i===0?" first":"")+(p.skip?" skip":"");
+    var nm=p.h ? '<a class="nm" href="'+p.h+'">'+esc(p.t)+'</a>'
+                : '<span class="nm off2">'+esc(p.t)+'</span>';
+    var tail=p.h ? '<span class="hr">'+p.hrs+'h</span>' : '<span class="soon">soon</span>';
+    if(p.skip) tail='<span class="soon">optional</span>';
+    return '<li class="'+cls+'"><span class="i">'+n+'</span>'+nm+tail+'</li>';
+  }).join("");
+}
+
+/* ---------- build the plan ---------- */
+function buildPlan(){
+  var a=S.a, hrs=parseInt(a.hours||7,10);
+  var d=decide(a), T=d.track, G=GOALS[a.goal]||GOALS.job;
+
+  document.documentElement.setAttribute("data-track",T.accent);
+
+  var core=CORE.map(function(p){
+    var q=Object.assign({},p);
+    if(p.code && a.level==="dev") q.hrs=2;
+    if(p.code && (a.need==="nocode"||T.key==="grc")) q.skip=true;
+    if(a.level==="it" && /Networking/.test(p.t)) q.hrs=2;
+    return q;
+  });
+  var coreH=core.reduce(function(x,p){return x+(p.skip?0:p.hrs);},0);
+  var trackH=T.pages.reduce(function(x,p){return x+p.hrs;},0);
+  var goalH=G.pages.reduce(function(x,p){return x+p.hrs;},0);
+
+  var w1=coreH/hrs, w2=trackH/hrs, w3=goalH/hrs, wTot=w1+w2+w3;
+  var live=core.filter(function(p){return p.h&&!p.skip;}).length+
+           T.pages.filter(function(p){return p.h;}).length+
+           G.pages.filter(function(p){return p.h;}).length;
+
+  document.getElementById("planTitle").textContent = T.name + " → " + G.name;
+
+  document.getElementById("planTiles").innerHTML =
+    '<div class="tile acc"><span class="v">'+T.name+'</span><span class="l">your track</span></div>'+
+    '<div class="tile"><span class="v">'+Math.ceil(wTot)+' wks</span><span class="l">to '+G.label.toLowerCase()+'-ready</span></div>'+
+    '<div class="tile"><span class="v">'+hrs+'h</span><span class="l">per week</span></div>'+
+    '<div class="tile"><span class="v">'+(core.length+T.pages.length+G.pages.length)+'</span><span class="l">levels ('+live+' live)</span></div>';
+
+  var vibeTxt={break:"you'd rather break things than watch them",
+    hunt:"you'd rather reconstruct what happened",
+    process:"you'd rather find where a process fails",
+    ai:"you'd rather make a model misbehave"}[a.vibe]||"your answers";
+  var needTxt={fast:"speed to employment",nocode:"minimal coding",
+    deep:"depth over speed",upskill:"more range where you already work"}[a.need]||"your priority";
+  document.getElementById("planWhy").innerHTML =
+    '<b>Why '+T.name+':</b> '+vibeTxt+'. Goal <b>'+G.name.toLowerCase()+
+    '</b> · priority <b>'+needTxt+'</b>. Roles: '+T.role+'.'+
+    (T.key==="offense"&&a.need==="fast" ? ' Offense juniors are rarer — Defense hires more if speed is #1.' : '')+
+    (a.goal==="research" ? ' Research sits after Job Ready — clear web/network first.' : '');
+
+  var idx=1, html="";
+  html+='<div class="phase"><span class="pn"></span><div class="ph"><span class="t">Act 1 · CyberCore</span>'+
+    '<span class="w">weeks 1–'+Math.max(1,Math.ceil(w1))+'</span><span class="w">'+coreH+'h</span></div>'+
+    '<ul class="plist">'+pagesHTML(core,idx,true)+'</ul></div>';
+  idx+=core.length;
+  html+='<div class="phase"><span class="pn"></span><div class="ph"><span class="t">Act 2 · '+T.name+'</span>'+
+    '<span class="w">weeks '+(Math.ceil(w1)+1)+'–'+Math.ceil(w1+w2)+'</span><span class="w">'+trackH+'h</span></div>'+
+    '<ul class="plist">'+pagesHTML(T.pages,idx,false)+'</ul></div>';
+  idx+=T.pages.length;
+  html+='<div class="phase"><span class="pn"></span><div class="ph"><span class="t">Job gate · Discord</span>'+
+    '<span class="w">after Act 2</span></div>'+
+    '<ul class="plist"><li class="pg"><span class="i">—</span><span class="nm">Apply with Job Ready badge · job alerts in Discord</span><span class="hr">gate</span></li></ul></div>';
+  html+='<div class="phase later"><span class="pn"></span><div class="ph"><span class="t">Act 3 · '+G.name+' (optional trees)</span>'+
+    '<span class="w">weeks '+(Math.ceil(w1+w2)+1)+'–'+Math.ceil(wTot)+'</span><span class="w">'+goalH+'h</span></div>'+
+    '<ul class="plist">'+pagesHTML(G.pages,idx,false)+'</ul></div>';
+  document.getElementById("planPhases").innerHTML=html;
+
+  document.getElementById("planMiles").innerHTML=
+    '<div class="tiles c3">'+
+    '<div class="tile"><span class="v mono">'+fmt(wk(w1))+'</span><span class="l">Core clear</span></div>'+
+    '<div class="tile"><span class="v mono">'+fmt(wk(w1+w2))+'</span><span class="l">Job Ready target</span></div>'+
+    '<div class="tile"><span class="v mono">'+fmt(wk(wTot))+'</span><span class="l">'+G.label+' tree</span></div>'+
+    '</div><p class="why" style="font:12px/1.5 var(--mono);color:var(--ink-faint);margin-top:10px">'+
+    'Assumes '+hrs+'h/week and that you clear the labs — not just read.</p>';
+
+  var first=core.filter(function(p){return p.h&&!p.skip;})[0]||
+            T.pages.filter(function(p){return p.h;})[0];
+  var big=document.getElementById("planNext");
+  if(first){
+    big.href=first.h;
+    document.getElementById("planNextT").textContent=first.t;
+    document.getElementById("planNextD").textContent="Act 1 · ~"+first.hrs+"h · terminal missions";
+  }else{
+    big.removeAttribute("href");
+    document.getElementById("planNextT").textContent="Nothing live for this path yet";
+    document.getElementById("planNextD").textContent="Join Discord — you'll hear when it ships.";
+  }
+
+  var msg="New here 👋\n"+
+    "Track: "+T.name+"\n"+
+    "Goal: "+G.name+"\n"+
+    "Pace: ~"+hrs+"h/week — Job Ready target "+fmt(wk(w1+w2))+"\n"+
+    "Starting: "+(first?first.t:"CyberCore")+"\n"+
+    "Ask me about my lab notes in a week.";
+  document.getElementById("dcMsg").textContent=msg;
+
+  PROG.plan={track:T.key,goal:a.goal,hrs:hrs,level:a.level};
+  saveProg();
+  award("start-here",50,"initiate");
+
+  window.__plan = {
+    md:"# My cybersecurity campaign\n\nTrack: "+T.name+"\nGoal: "+G.name+"\nPace: "+hrs+
+       "h/week\nJob Ready target: "+fmt(wk(w1+w2))+"\n\n## Act 1 — CyberCore ("+coreH+"h)\n"+
+       core.map(function(p){return "- [ ] "+p.t+(p.skip?" (optional)":"")+" — "+p.hrs+"h";}).join("\n")+
+       "\n\n## Act 2 — "+T.name+" ("+trackH+"h)\n"+
+       T.pages.map(function(p){return "- [ ] "+p.t+" — "+p.hrs+"h";}).join("\n")+
+       "\n\n## Job gate\n- [ ] Apply in Discord with Job Ready badge\n"+
+       "\n## Act 3 — "+G.name+" ("+goalH+"h)\n"+
+       G.pages.map(function(p){return "- [ ] "+p.t+" — "+p.hrs+"h";}).join("\n")+
+       "\n",
+    msg:msg
+  };
+}
+
+/* ---------- copy ---------- */
+function copy(txt, btn){
+  function done(){ var o=btn.innerHTML; btn.textContent="Copied ✓";
+    setTimeout(function(){ btn.innerHTML=o; },1500); }
+  function fb(){
+    var t=document.createElement("textarea");
+    t.value=txt; t.setAttribute("readonly","");
+    t.style.cssText="position:fixed;top:0;left:-9999px";
+    document.body.appendChild(t); t.select();
+    try{ document.execCommand("copy"); done(); }catch(e){ btn.textContent="Select it manually"; }
+    document.body.removeChild(t);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done,fb);
+  } else fb();
+}
+document.getElementById("copyMsg").addEventListener("click",function(){
+  copy(window.__plan?window.__plan.msg:"", this); });
+document.getElementById("copyPlan").addEventListener("click",function(){
+  copy(window.__plan?window.__plan.md:"", this); });
+
+/* ---------- discord links ---------- */
+(function(){
+  var a=document.getElementById("dcLink");
+  if(LINKS.discord){ a.href=LINKS.discord; a.target="_blank"; a.rel="noopener noreferrer"; }
+  else{
+    a.removeAttribute("href"); a.style.opacity=".55";
+    a.querySelector(".d").textContent="Set LINKS.discord in this file.";
+  }
+})();
+
+/* ---------- full index ---------- */
+document.getElementById("idx").innerHTML = INDEX.map(function(g){
+  var liveN=g[2].filter(function(p){return p.h;}).length;
+  return '<details class="grp '+g[0]+'"><summary><span class="dt"></span>'+
+    '<span class="gn">'+esc(g[1])+'</span><span class="gc">'+g[2].length+' · '+
+    (liveN?liveN+" live":"soon")+'</span></summary><ul>'+
+    g[2].map(function(p){
+      return "<li>"+(p.h?'<a href="'+p.h+'">'+esc(p.t)+"</a>"
+                       :'<span class="off2">'+esc(p.t)+'</span><span class="soon">soon</span>')+"</li>";
+    }).join("")+"</ul></details>";
+}).join("");
+
+/* ---------- screen machine ---------- */
+var cur=0;
+function paint(){
+  QS.forEach(function(q,i){
+    var d=dotsEl.children[i];
+    var st = S.a[q.getAttribute("data-q")] ? "done" : "";
+    if(cur===i+1) st="active";
+    if(d) d.setAttribute("data-state",st);
+  });
+  var n=Object.keys(S.a).length;
+  if(fillEl) fillEl.style.width=(Math.min(n,QS.length)/QS.length*100)+"%";
+  if(cur===0) ctrEl.innerHTML="Start";
+  else if(cur===PLAN) ctrEl.innerHTML="<b>Campaign</b>";
+  else if(cur===MAP) ctrEl.innerHTML="Map";
+  else ctrEl.innerHTML="Q <b>"+cur+"</b>/"+QS.length;
+}
+function show(i,noScroll){
+  cur=Math.max(0,Math.min(MAP,i));
+  if(cur===PLAN){
+    var missing=QS.filter(function(q){return !S.a[q.getAttribute("data-q")];});
+    if(missing.length){ cur=scrs.indexOf(missing[0]); }
+    else buildPlan();
+  }
+  scrs.forEach(function(s,k){ s.hidden=(k!==cur); });
+
+  QS.forEach(function(q){
+    var v=S.a[q.getAttribute("data-q")];
+    q.querySelectorAll(".op").forEach(function(o){
+      o.setAttribute("aria-pressed",String(!!v&&o.getAttribute("data-v")===v));
+    });
+  });
+
+  prevB.hidden = (cur===0);
+  skipB.hidden = (cur===MAP||cur===PLAN);
+  nextB.hidden = false;
+  nextB.disabled = false;
+  if(cur===0){ nextB.textContent="Start campaign →"; }
+  else if(cur>=1&&cur<=QS.length){
+    var q=scrs[cur], answered=!!S.a[q.getAttribute("data-q")];
+    nextB.textContent = (cur===QS.length) ? "Lock campaign →" : "Next →";
+    nextB.disabled = !answered;
+  }
+  else if(cur===PLAN){ nextB.textContent="Full map →"; }
+  else if(cur===MAP){ nextB.textContent="Start campaign →"; }
+
+  S.i=cur; save(); paint();
+  try{ history.replaceState(null,"",cur===0?"#":("#"+(cur===PLAN?"plan":cur===MAP?"map":"q"+cur))); }catch(e){}
+  if(!noScroll) toTop();
+}
+function toTop(){
+  try{ window.scrollTo(0,0); return; }catch(e){}
+  try{ document.querySelector(".rail").scrollIntoView({block:"start"}); }catch(e){}
+}
+nextB.addEventListener("click",function(){
+  if(cur===MAP) return show(1);
+  if(cur===PLAN) return show(MAP);
+  show(cur+1);
+});
+prevB.addEventListener("click",function(){
+  if(cur===MAP) return show(Object.keys(S.a).length>=QS.length?PLAN:0);
+  show(cur-1);
+});
+skipB.addEventListener("click",function(){ show(MAP); });
+document.getElementById("showMap").addEventListener("click",function(){ show(MAP); });
+document.getElementById("redo").addEventListener("click",function(){
+  S.a={}; save(); document.documentElement.setAttribute("data-track","career"); show(1);
+});
+document.addEventListener("keydown",function(e){
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+  if(e.key==="ArrowRight"&&!nextB.disabled) nextB.click();
+  if(e.key==="ArrowLeft"&&cur>0) prevB.click();
+});
+
+/* ---------- init ---------- */
+(function(){
+  var h=location.hash.slice(1);
+  if(h==="map") return show(MAP,true);
+  if(h==="plan") return show(PLAN,true);
+  var m=/^q(\d+)$/.exec(h);
+  if(m) return show(parseInt(m[1],10),true);
+  show(S.i||0,true);
+})();
+})();
+</script>
+</body>
+</html>
