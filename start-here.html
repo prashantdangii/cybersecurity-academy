@@ -550,8 +550,8 @@ footer.page{margin-top:32px;border-top:1px solid var(--line);padding-top:18px;co
   <div class="ncards">
     <a class="ncard dc" id="dcLink" href="#">
       <span class="k">Community</span>
-      <span class="t">Unlock on Discord</span>
-      <span class="d">Jobs · mentors · gated labs — join to unlock</span>
+      <span class="t">Open Discord</span>
+      <span class="d">Updates · drills · jobs lounge</span>
     </a>
     <button class="ncard back" type="button" id="showMap" style="text-align:left;cursor:pointer">
       <span class="k">Browse</span>
@@ -567,7 +567,7 @@ footer.page{margin-top:32px;border-top:1px solid var(--line);padding-top:18px;co
     <summary>What clears each bar</summary>
     <div class="in">
       <p><strong>Beginner:</strong> shell without googling every flag · one attack you ran yourself.</p>
-      <p><strong>Job Ready:</strong> Core + track missions cleared · resume/portfolio · unlock Discord & apply.</p>
+      <p><strong>Job Ready:</strong> Core + track missions cleared · resume/portfolio · open Discord & apply.</p>
       <p><strong>Specialist:</strong> any advanced tree (bounty / defense / research) after the job gate.</p>
     </div>
   </details>
@@ -647,7 +647,7 @@ footer.page{margin-top:32px;border-top:1px solid var(--line);padding-top:18px;co
    becoming a dead link.
    =========================================================================== */
 var LINKS = {
-  discord: "https://whop.com/checkout/3Ugn8Q3jNpHU2kPeEN-0Xm3-uqfq-nck6-mRWOKnNAVQNB/"
+  discord: "https://discord.com/channels/1449813215788797954"
 };
 
 /* ===========================================================================
@@ -736,8 +736,8 @@ var INDEX = [
   ["grc","GRC & Compliance",         TRACKS.grc.pages],
   ["ai","AI Security",               TRACKS.ai.pages.slice(1)],
   ["off","Exploit Development & Vuln Research", GOALS.research.pages],
-  ["career","Community unlock", [
-    {t:"Unlock Discord — Job Ready HQ", h:"community/discord-hub.html", hrs:1}
+  ["career","Academy Discord", [
+    {t:"Academy Discord HQ", h:"community/discord-hub.html", hrs:1}
   ]]
 ];
 
@@ -957,7 +957,7 @@ function buildPlan(){
   }else{
     big.removeAttribute("href");
     document.getElementById("planNextT").textContent="Nothing live for this path yet";
-    document.getElementById("planNextD").textContent="Join Discord — you'll hear when it ships.";
+    document.getElementById("planNextD").textContent="Open Discord — updates land there first.";
   }
 
   var msg="New here 👋\n"+

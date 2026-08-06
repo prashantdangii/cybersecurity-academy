@@ -585,9 +585,9 @@ footer.page{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;co
     <div class="quiz">
       <p class="qq">You're in <code class="inl">/home/lab/lab</code>. Which goes to home fastest?</p>
       <div class="qopts">
+        <button class="qopt" type="button" data-why="cd / is filesystem root, not home."><span class="m"></span><span>cd /</span></button>
         <button class="qopt" type="button" data-why="Works, but slower than cd or cd ~."><span class="m"></span><span>cd ../../..</span></button>
         <button class="qopt" type="button" data-ok="1" data-why="Bare cd (or cd ~) jumps to the user's home."><span class="m"></span><span>cd</span></button>
-        <button class="qopt" type="button" data-why="cd / is filesystem root, not home."><span class="m"></span><span>cd /</span></button>
       </div>
     </div>
   </div>
@@ -642,9 +642,9 @@ file /bin/ls</code></pre>
     <div class="quiz">
       <p class="qq">Best tool to watch a growing log live?</p>
       <div class="qopts">
+        <button class="qopt" type="button" data-why="head only shows the start of the file."><span class="m"></span><span>head -f logfile</span></button>
         <button class="qopt" type="button" data-why="cat dumps once — it doesn't follow new lines."><span class="m"></span><span>cat logfile</span></button>
         <button class="qopt" type="button" data-ok="1" data-why="tail -f follows appended lines — the classic live log view."><span class="m"></span><span>tail -f logfile</span></button>
-        <button class="qopt" type="button" data-why="head only shows the start of the file."><span class="m"></span><span>head -f logfile</span></button>
       </div>
     </div>
   </div>
@@ -698,8 +698,8 @@ rm -i old.txt</code></pre>
     <div class="quiz">
       <p class="qq"><code class="inl">mv a.txt b.txt</code> when b.txt doesn't exist does what?</p>
       <div class="qopts">
-        <button class="qopt" type="button" data-why="That would be cp."><span class="m"></span><span>Copies a.txt to b.txt and keeps a.txt</span></button>
         <button class="qopt" type="button" data-ok="1" data-why="mv renames/moves. No destination file ⇒ rename a.txt → b.txt."><span class="m"></span><span>Renames a.txt to b.txt</span></button>
+        <button class="qopt" type="button" data-why="That would be cp."><span class="m"></span><span>Copies a.txt to b.txt and keeps a.txt</span></button>
         <button class="qopt" type="button" data-why="mv doesn't delete without replacing/moving."><span class="m"></span><span>Deletes a.txt only</span></button>
       </div>
     </div>
@@ -758,9 +758,9 @@ ls -l · id · groups</code></pre>
     <div class="quiz">
       <p class="qq">File mode ends with <code class="inl">rw-rw-rw-</code> (666). Security issue?</p>
       <div class="qopts">
+        <button class="qopt" type="button" data-why="666 has no execute bit; the issue is write for others."><span class="m"></span><span>Only that it isn't executable</span></button>
         <button class="qopt" type="button" data-why="Any local user can write it — classic misconfiguration."><span class="m"></span><span>No — world-writable is fine for scripts</span></button>
         <button class="qopt" type="button" data-ok="1" data-why="World-writable files can be tampered by any user — high value for attackers."><span class="m"></span><span>Yes — any user can modify it</span></button>
-        <button class="qopt" type="button" data-why="666 has no execute bit; the issue is write for others."><span class="m"></span><span>Only that it isn't executable</span></button>
       </div>
     </div>
   </div>
@@ -863,8 +863,8 @@ echo hi >> out.txt</code></pre>
       <p class="qq"><code class="inl">cmd &gt; out.txt</code> when out.txt already exists…</p>
       <div class="qopts">
         <button class="qopt" type="button" data-why="That's >> append behavior."><span class="m"></span><span>Appends to the end</span></button>
-        <button class="qopt" type="button" data-ok="1" data-why="> truncates/overwrites the file, then writes."><span class="m"></span><span>Overwrites the file</span></button>
         <button class="qopt" type="button" data-why="Shell will overwrite; it won't refuse by default."><span class="m"></span><span>Fails with an error</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="> truncates/overwrites the file, then writes."><span class="m"></span><span>Overwrites the file</span></button>
       </div>
     </div>
   </div>
@@ -921,9 +921,9 @@ top            # q to quit</code></pre>
     <div class="quiz">
       <p class="qq">Prefer first stop signal for a stuck app?</p>
       <div class="qopts">
-        <button class="qopt" type="button" data-why="-9/SIGKILL can't be caught — no cleanup. Last resort only."><span class="m"></span><span>kill -9 immediately</span></button>
-        <button class="qopt" type="button" data-ok="1" data-why="Default kill sends SIGTERM — process can exit cleanly."><span class="m"></span><span>kill PID (SIGTERM)</span></button>
         <button class="qopt" type="button" data-why="reboot is nuclear and unrelated to one process."><span class="m"></span><span>reboot the box</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="Default kill sends SIGTERM — process can exit cleanly."><span class="m"></span><span>kill PID (SIGTERM)</span></button>
+        <button class="qopt" type="button" data-why="-9/SIGKILL can't be caught — no cleanup. Last resort only."><span class="m"></span><span>kill -9 immediately</span></button>
       </div>
     </div>
   </div>
@@ -968,9 +968,9 @@ top            # q to quit</code></pre>
     <div class="quiz">
       <p class="qq">Best first move on an unfamiliar directory in a CTF?</p>
       <div class="qopts">
-        <button class="qopt" type="button" data-why="Blind rm loses evidence and flags."><span class="m"></span><span>rm -rf * to clear noise</span></button>
-        <button class="qopt" type="button" data-ok="1" data-why="Orient with ls -la (see hidden), then find/grep with purpose."><span class="m"></span><span>ls -la then find/grep with a goal</span></button>
         <button class="qopt" type="button" data-why="chmod -R 777 is dangerous and usually wrong."><span class="m"></span><span>chmod -R 777 .</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="Orient with ls -la (see hidden), then find/grep with purpose."><span class="m"></span><span>ls -la then find/grep with a goal</span></button>
+        <button class="qopt" type="button" data-why="Blind rm loses evidence and flags."><span class="m"></span><span>rm -rf * to clear noise</span></button>
       </div>
     </div>
   </div>
@@ -998,7 +998,7 @@ top            # q to quit</code></pre>
         <span class="t">Networking fundamentals</span>
         <span class="d">Revisit packets, ports, and recon.</span>
       </a>
-      <a class="ncard dc" href="https://whop.com/checkout/3Ugn8Q3jNpHU2kPeEN-0Xm3-uqfq-nck6-mRWOKnNAVQNB/" target="_blank" rel="noopener noreferrer"><span class="k">Unlock on Discord</span><span class="t">Join the academy</span><span class="d">Jobs · mentors · gated labs</span></a><a class="ncard back" href="../start-here.html">
+      <a class="ncard dc" href="https://discord.com/channels/1449813215788797954" target="_blank" rel="noopener noreferrer"><span class="k">Open Discord</span><span class="t">Academy HQ</span><span class="d">Updates · drills · jobs lounge</span></a><a class="ncard back" href="../start-here.html">
         <span class="k">Back to</span>
         <span class="t">Your campaign</span>
         <span class="d">Act 1 map.</span>

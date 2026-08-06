@@ -511,8 +511,8 @@ footer.page{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;co
       <p class="qq">Attacker defaces your homepage HTML. Primary CIA hit?</p>
       <div class="qopts">
         <button class="qopt" type="button" data-why="Defacement is unauthorized change — integrity first (availability/reputation secondary)."><span class="m"></span><span>Confidentiality</span></button>
-        <button class="qopt" type="button" data-ok="1" data-why="Content was altered without authorization — classic integrity failure."><span class="m"></span><span>Integrity</span></button>
         <button class="qopt" type="button" data-why="Site may still be up; the core issue is tampering."><span class="m"></span><span>Availability only</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="Content was altered without authorization — classic integrity failure."><span class="m"></span><span>Integrity</span></button>
       </div>
     </div>
   </div>
@@ -540,9 +540,9 @@ footer.page{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;co
     <div class="quiz">
       <p class="qq">“OpenSSH 0-day published today.” That headline alone is…</p>
       <div class="qopts">
-        <button class="qopt" type="button" data-why="Without your exposure/impact, it’s a vulnerability (and a threat capability) — not quantified risk yet."><span class="m"></span><span>Your risk score for sure</span></button>
-        <button class="qopt" type="button" data-ok="1" data-why="It’s a vulnerability (and enables threats). Risk depends on whether you run it, exposure, and impact."><span class="m"></span><span>A vulnerability (risk depends on your exposure)</span></button>
         <button class="qopt" type="button" data-why="A CVE isn’t an asset."><span class="m"></span><span>An asset inventory item</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="It’s a vulnerability (and enables threats). Risk depends on whether you run it, exposure, and impact."><span class="m"></span><span>A vulnerability (risk depends on your exposure)</span></button>
+        <button class="qopt" type="button" data-why="Without your exposure/impact, it’s a vulnerability (and a threat capability) — not quantified risk yet."><span class="m"></span><span>Your risk score for sure</span></button>
       </div>
     </div>
   </div>
@@ -575,9 +575,9 @@ footer.page{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;co
     <div class="quiz">
       <p class="qq">Exposing an admin panel on the public internet mainly increases…</p>
       <div class="qopts">
+        <button class="qopt" type="button" data-why="Availability might be fine; exposure is the issue."><span class="m"></span><span>Backup retention only</span></button>
         <button class="qopt" type="button" data-why="It may add vulns, but the immediate effect is a larger reachable surface."><span class="m"></span><span>Only cryptography strength</span></button>
         <button class="qopt" type="button" data-ok="1" data-why="More internet-reachable entry points = larger attack surface."><span class="m"></span><span>Attack surface</span></button>
-        <button class="qopt" type="button" data-why="Availability might be fine; exposure is the issue."><span class="m"></span><span>Backup retention only</span></button>
       </div>
     </div>
   </div>
@@ -604,8 +604,8 @@ footer.page{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;co
     <div class="quiz">
       <p class="qq">Same password works on LinkedIn and your corp VPN after a breach dump. Likely class?</p>
       <div class="qopts">
-        <button class="qopt" type="button" data-why="XSS is injecting script into a page — not reusing passwords across sites."><span class="m"></span><span>XSS</span></button>
         <button class="qopt" type="button" data-ok="1" data-why="Credential stuffing/reuse: leaked password tried on other services."><span class="m"></span><span>Credential stuffing / password reuse</span></button>
+        <button class="qopt" type="button" data-why="XSS is injecting script into a page — not reusing passwords across sites."><span class="m"></span><span>XSS</span></button>
         <button class="qopt" type="button" data-why="DDoS is availability flooding, not account takeover via reused passwords."><span class="m"></span><span>DDoS</span></button>
       </div>
     </div>
@@ -726,8 +726,8 @@ footer.page{margin-top:34px;border-top:1px solid var(--line);padding-top:18px;co
     <div class="quiz">
       <p class="qq">TLS mainly protects data in transit for…</p>
       <div class="qopts">
-        <button class="qopt" type="button" data-why="TLS provides confidentiality (and integrity) of the channel — not a password DB design."><span class="m"></span><span>Storing passwords in the database</span></button>
         <button class="qopt" type="button" data-ok="1" data-why="TLS encrypts (and authenticates) the connection path — classic confidentiality in transit."><span class="m"></span><span>Confidentiality (and integrity) on the wire</span></button>
+        <button class="qopt" type="button" data-why="TLS provides confidentiality (and integrity) of the channel — not a password DB design."><span class="m"></span><span>Storing passwords in the database</span></button>
         <button class="qopt" type="button" data-why="Disk encryption is a different control (at rest)."><span class="m"></span><span>Full-disk encryption only</span></button>
       </div>
     </div>
@@ -779,8 +779,8 @@ last -a | head
       <p class="qq">Best early signal of password spray?</p>
       <div class="qopts">
         <button class="qopt" type="button" data-why="CPU alone isn’t identity abuse."><span class="m"></span><span>High CPU on a printer</span></button>
-        <button class="qopt" type="button" data-ok="1" data-why="Many auth failures across users from one source is classic spray/stuffing signal."><span class="m"></span><span>Burst of auth failures across many accounts</span></button>
         <button class="qopt" type="button" data-why="Successful single SSO login is normal unless other context."><span class="m"></span><span>One successful SSO login at 9am</span></button>
+        <button class="qopt" type="button" data-ok="1" data-why="Many auth failures across users from one source is classic spray/stuffing signal."><span class="m"></span><span>Burst of auth failures across many accounts</span></button>
       </div>
     </div>
   </div>
@@ -855,7 +855,7 @@ last -a | head
         <span class="t">Linux command-line essentials</span>
         <span class="d">Shell fluency for every lab.</span>
       </a>
-      <a class="ncard dc" href="https://whop.com/checkout/3Ugn8Q3jNpHU2kPeEN-0Xm3-uqfq-nck6-mRWOKnNAVQNB/" target="_blank" rel="noopener noreferrer"><span class="k">Unlock on Discord</span><span class="t">Join the academy</span><span class="d">Jobs · mentors · gated labs</span></a><a class="ncard back" href="../start-here.html">
+      <a class="ncard dc" href="https://discord.com/channels/1449813215788797954" target="_blank" rel="noopener noreferrer"><span class="k">Open Discord</span><span class="t">Academy HQ</span><span class="d">Updates · drills · jobs lounge</span></a><a class="ncard back" href="../start-here.html">
         <span class="k">Back to</span>
         <span class="t">Your campaign</span>
         <span class="d">Act 1 map.</span>

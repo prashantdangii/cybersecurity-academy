@@ -9,6 +9,7 @@ Standalone HTML learning pages embedded in a Whop community as **Web app** / **C
 - **Mobile first.** Whop is used heavily on phones. Every page must be readable at 360px wide.
 - **Never link to a page that doesn't exist.** Use the `.ncard.soon` / `.soon` badge markup instead.
 - **Visual over verbal.** No block of body copy longer than ~4 lines. If you're writing a paragraph, check whether a `.flow`, `.layers`, `.tiles`, `.vs` or `.chips` component says it better. Prose that genuinely can't be cut goes inside a collapsed `<details class="more">`.
+- **Discord is the ops home, not a paywall.** Whop already gates access on subscribe/trial. CTAs say **Open Discord** and deep-link to the server (`https://discord.com/channels/1449813215788797954`). Swap that URL for a permanent `discord.gg` invite in `_gen_full_course.py` (`DISCORD`) + `start-here.html` (`LINKS.discord`) if you prefer. Never point lesson CTAs at Whop checkout.
 
 ## How a page behaves
 
@@ -62,7 +63,7 @@ community/                      wins wall
 
 ```js
 var LINKS = {
-  discord: "https://whop.com/checkout/3Ugn8Q3jNpHU2kPeEN-0Xm3-uqfq-nck6-mRWOKnNAVQNB/"
+  discord: "https://discord.com/channels/1449813215788797954"
 };
 ```
 
@@ -144,4 +145,4 @@ Every lab targets systems the learner owns, an intentionally vulnerable app they
 
 ## Build status
 
-Full curriculum shipped (CyberCore → Offense → Job gate → Bounty/Freelance/Defense/GRC/AI/Research + Discord unlock hub).
+Full curriculum shipped (CyberCore → Offense → Job gate → Bounty/Freelance/Defense/GRC/AI/Research + Discord HQ).

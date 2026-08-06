@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Generate remaining Cybersecurity Academy lesson pages + Discord funnel wiring."""
+"""Generate remaining Cybersecurity Academy lesson pages + Discord HQ wiring."""
 from __future__ import annotations
 
+import hashlib
 import json
+import random
 import re
 import subprocess
 from pathlib import Path
 
 ROOT = Path("/Users/prashantdangi/cybersecurity-academy")
-DISCORD = "https://whop.com/checkout/3Ugn8Q3jNpHU2kPeEN-0Xm3-uqfq-nck6-mRWOKnNAVQNB/"
+DISCORD = "https://discord.com/channels/1449813215788797954"
 
 CSS = re.search(
     r"(<style>[\s\S]*?</style>)",
@@ -31,8 +33,12 @@ def esc_attr(s: str) -> str:
 
 
 def q(qq, opts):
+    """Build a quiz; option order is seeded-shuffled so the correct answer is not always B."""
+    items = list(opts)
+    rng = random.Random(int(hashlib.sha256(f"mcq-v2:{qq}".encode()).hexdigest()[:16], 16))
+    rng.shuffle(items)
     buttons = []
-    for item in opts:
+    for item in items:
         if len(item) == 2:
             text, ok = item
             why = "Solid." if ok else "Not quite."
@@ -79,18 +85,18 @@ def term(tid, title, mt, md, tasks, prompt="ops@lab:~$"):
 </div></div>'''
 
 
-def unlock_box(blurb="Live coaching, job alerts, and gated drops unlock inside Discord."):
+def unlock_box(blurb="Daily drills, job alerts, and chapter updates land in Discord."):
     return f'''
-<div class="unlock"><span class="k">Unlock on Discord</span>
+<div class="unlock"><span class="k">Open Discord</span>
 <p>{blurb}</p>
-<a class="btn pri" href="{DISCORD}" target="_blank" rel="noopener noreferrer">Join &amp; unlock →</a>
+<a class="btn pri" href="{DISCORD}" target="_blank" rel="noopener noreferrer">Open Discord →</a>
 </div>'''
 
 
-def discord_card(d="Jobs · mentor help · gated labs"):
+def discord_card(d="Chapter drops · Q&A · check-ins"):
     return (
         f'<a class="ncard dc" href="{DISCORD}" target="_blank" rel="noopener noreferrer">'
-        f'<span class="k">Unlock on Discord</span><span class="t">Join the academy</span>'
+        f'<span class="k">Open Discord</span><span class="t">Academy HQ</span>'
         f'<span class="d">{d}</span></a>'
     )
 
@@ -393,13 +399,13 @@ def write_page(
   <div class="note legal"><span class="lb">Rule</span>
     <p><b>{legal}</b></p>
   </div>
-  {unlock_box("Clear missions here — then unlock job alerts, reviews, and gated content on Discord.")}
+  {unlock_box("Missions live on this page. Open Discord for chapter drops, daily drills, and job channels.")}
 </section>
 {missions}
 <section class="lesson" id="fin" hidden>
   <div class="fin"><div class="ring">✓</div>
     <h2>Level clear — {title}</h2>
-    <p>Save proof in <code class="inl">lab-notes.md</code>. Unlock the next drops + community on Discord.</p>
+    <p>Save proof in <code class="inl">lab-notes.md</code>. Continue in Discord for updates, drills, and the next chapter drops.</p>
     <div class="tiles c3" style="text-align:left;margin-bottom:22px">
       <div class="tile acc"><span class="v" id="finSteps">—</span><span class="l">steps done</span></div>
       <div class="tile"><span class="v" id="finLabs">0/0</span><span class="l">lab tasks</span></div>
@@ -580,16 +586,16 @@ results.append(
                     ),
                 ),
                 (
-                    "Discord job funnel",
+                    "Discord job lounge",
                     "Apply where hiring happens",
                     "concept · check",
                     "<p>Job Ready means: Core + track done + resume/portfolio. Apply in Discord — mentors and job posts live there.</p>"
-                    + unlock_box("Unlock job channels, intro reviews, and hiring threads on Discord."),
+                    + unlock_box("Post intros, get reviews, and track jobs in Discord."),
                     q(
                         "After Job Ready, where do you apply first in this academy?",
                         [
                             ("Random cold DMs with no proof", "Low signal.", False),
-                            ("Discord job / intro channels with portfolio links", "Built-in funnel.", True),
+                            ("Discord job / intro channels with portfolio links", "Ops home.", True),
                             ("Skip community forever", "Misses the gate.", False),
                         ],
                     ),
@@ -648,7 +654,7 @@ results.append(
         "career",
         "Interview prep",
         "career / interviews // job gate · level 2",
-        "Practice stories, whiteboard threats, and live lab talk — then unlock mock interviews on Discord.",
+        "Practice stories, whiteboard threats, and live lab talk — then run mocks in Discord.",
         ["→ Jobs"],
         ["6 missions", "~3 hrs", "+100 XP"],
         pack_missions(
@@ -738,14 +744,14 @@ results.append(
                 ),
                 (
                     "Mock interviews",
-                    "Unlock practice",
+                    "Practice together",
                     "concept · check",
                     "<p>Mock loops happen in Discord — book reviews, peer practice, hiring office hours.</p>"
-                    + unlock_box("Unlock mock interview channels and mentor feedback on Discord."),
+                    + unlock_box("Practice interviews and get feedback in Discord."),
                     q(
                         "Best place for academy mock interviews?",
                         [
-                            ("Discord (unlocked community)", "That's the funnel.", True),
+                            ("Discord (Academy HQ)", "That's the ops home.", True),
                             ("Nowhere — wing it", "Practice beats winging.", False),
                             ("Only after 10 years experience", "Practice early.", False),
                         ],
@@ -796,7 +802,7 @@ results.append(
         "career",
         "Certification roadmap",
         "career / certs // job gate · level 3",
-        "Pick certs that match your lane — proof > logos. Unlock study groups on Discord.",
+        "Pick certs that match your lane — proof > logos. Study groups live in Discord.",
         ["→ Jobs", "→ Specialist"],
         ["5 missions", "~2 hrs", "+100 XP"],
         pack_missions(
@@ -856,7 +862,7 @@ results.append(
                             "Join Discord study channel.",
                         ],
                     )
-                    + unlock_box("Unlock study groups and accountability threads on Discord.")
+                    + unlock_box("Study groups and accountability streaks live in Discord.")
                     + q(
                         "A good study plan includes…",
                         [
@@ -925,7 +931,7 @@ term("sev","bash · severity","Rank impact","Type impact then payout",[
 ("p",'Think payout (<code class="inl">payout</code>)'),
 ],"hunter@bb:~$")+q("Self-XSS typically…",[("Pays like RCE","Usually low/informational.",False),("Is low value without an escalation chain","Needs real victim impact.",True),("Is always critical","No.",False)])),
 ("Safe hunting habits","Don't burn the program","concept · check",
-"<p>Throttle, avoid DoS, no social engineering unless allowed, no data exfil beyond PoC.</p>"+unlock_box("Unlock private program tips and live hunts on Discord."),
+"<p>Throttle, avoid DoS, no social engineering unless allowed, no data exfil beyond PoC.</p>"+unlock_box("Share hunts (in-scope) and tips in Discord bounty channels."),
 q("During bounty testing you should…",[("Dump full customer DBs","Excessive & banned.",False),("Minimize data access to prove impact","Ethics + policy.",True),("Hit production with stress tests","Often forbidden.",False)])),
 ("Workflow setup","Your hunt kit","concept · lab · check",
 "<p>Notes template, Burp project, wordlists, VPN/VPS hygiene, Discord accountability.</p>",
@@ -974,7 +980,7 @@ lab("One live in-scope host",[
 "<p>Public buckets, staging, admin panels, third-party SaaS connected to brand.</p>",
 q("Staging environments are…",[("Always out of scope","Check policy — often juicy if in-scope.",False),("High-value if in-scope (weaker controls)","Weaker controls, still must be in-scope.",True),("Illegal to mention","Report via platform if in policy.",False)])),
 ("Prioritization","Where bugs live","concept · check",
-"<p>New deploys, auth surfaces, file uploads, IDOR-prone IDs, forgotten admin.</p>"+unlock_box("Unlock recon playbooks and live target reviews on Discord."),
+"<p>New deploys, auth surfaces, file uploads, IDOR-prone IDs, forgotten admin.</p>"+unlock_box("Recon playbooks and peer reviews live in Discord."),
 q("Best next target after mapping?",[("The prettiest homepage","Not always.",False),("Auth + object IDs + recent changes","High ROI.",True),("Only static marketing pages","Usually thin.",False)])),
 ("Recon notes","Never lose a host","concept · lab · check",
 "<p>Keep a living inventory with dates, tech, interesting notes.</p>",
@@ -1016,7 +1022,7 @@ term("rep","bash · report","Draft impact","Type impact then fix",[
 ("f",'Fix (<code class="inl">fix</code>)'),
 ],"hunter@report:~$")+q("Good impact statements…",[("Only say 'this is bad'","Vague.",False),("Name affected roles/data/actions",True),("Demand max bounty or else","Unprofessional.",False)])),
 ("Collaboration tone","Be a partner","concept · check",
-"<p>Polite, responsive, no entitlement. Accept informative duplicates gracefully.</p>"+unlock_box("Get report reviews from mentors on Discord before you submit."),
+"<p>Polite, responsive, no entitlement. Accept informative duplicates gracefully.</p>"+unlock_box("Get report reviews in Discord before you submit."),
 q("If marked duplicate you should…",[("Harass triage","Ban risk.",False),("Learn & improve uniqueness next time",True),("Resubmit identical spam","No.",False)])),
 ("Template library","Speed with quality","concept · lab · check",
 "<p>Keep templates per bug class (IDOR, XSS, SSRF) — fill specifics each time.</p>",
@@ -1061,7 +1067,7 @@ term("api","http · api","Probe GraphQL lab","Type introspect then bola",[
 "<p>Redirect URI issues, token leakage, account linking, weak state/nonce.</p>",
 q("OAuth redirect URI flaws can lead to…",[("Faster CSS","No.",False),("Token/code theft",True),("Better SEO","No.",False)])),
 ("Research habits","Stay sharp","concept · check",
-"<p>Read writeups, diff changelogs, watch new features — tip sharing in Discord (no 0-day leaks for OOS).</p>"+unlock_box("Unlock advanced hunt sessions and private tips on Discord."),
+"<p>Read writeups, diff changelogs, watch new features — tip sharing in Discord (no 0-day leaks for OOS).</p>"+unlock_box("Advanced hunt sessions and tips land in Discord."),
 q("Best ongoing habit?",[("Only grind same payload list","Stagnates.",False),("Study writeups + retest new features",True),("Ignore scope updates","Dangerous.",False)])),
 ("Specialist gate","Keep climbing","concept · check",
 "<p>Bounty mastery feeds AppSec jobs and research. Apply wins to portfolio + Discord.</p>",
@@ -1100,7 +1106,7 @@ lab("Materials",[
 term("out","bash · outreach","Draft outreach","Type pitch then follow",[
 ("p",'Pitch (<code class="inl">pitch</code>)'),
 ("f",'Follow-up (<code class="inl">follow</code>)'),
-],"free@biz:~$")+unlock_box("Unlock client leads and intro threads on Discord.")
+],"free@biz:~$")+unlock_box("Freelance intros and lead threads live in Discord.")
 +q("Good outreach…",[("Threatens their site","Never.",False),("Offers a specific scoped value + proof",True),("Sends 500 identical spam DMs","Burns reputation.",False)])),
 ("Discovery call","Listen first","concept · check",
 "<p>Ask stack, compliance needs, timeline, out-of-scope systems. Never start testing without written OK.</p>",
@@ -1142,7 +1148,7 @@ lab("SOW draft",[
 "<p>Deposit before kickoff. Net-15/30 with late fees. Escrow when useful.</p>",
 q("Start deep testing before deposit?",[("Always","Risk.",False),("Prefer deposit/kickoff payment first",True),("Never discuss money","Unsustainable.",False)])),
 ("Insurance & liability","Adulting","concept · check",
-"<p>Know your limits; consider cyber/E&O as you grow. Don't accept unlimited liability.</p>"+unlock_box("Unlock contract templates discussion on Discord."),
+"<p>Know your limits; consider cyber/E&O as you grow. Don't accept unlimited liability.</p>"+unlock_box("Contract / SOW discussions happen in Discord."),
 q("Unlimited liability clauses are…",[("Great for freelancers","Dangerous.",False),("A red flag to negotiate",True),("Required by physics","No.",False)])),
 ("Change orders","Scope creep","concept · lab · check",
 "<p>New hosts/apps = new quote. Put change-order process in SOW.</p>",
@@ -1180,7 +1186,7 @@ term("port","bash · portfolio","Build sample","Type sample then index",[
 ("i",'Index (<code class="inl">index</code>)'),
 ],"free@folio:~$")+q("Sample reports prove…",[("You own Metasploit","Shallow.",False),("Your communication & methodology",True),("You ignore scope","Bad.",False)])),
 ("Website / Notion hub","One link","concept · check",
-"<p>Services · sample · about · contact · Discord CTA.</p>"+unlock_box("Get portfolio reviews on Discord."),
+"<p>Services · sample · about · contact · Discord CTA.</p>"+unlock_box("Get portfolio reviews in Discord."),
 q("Your hub should make it easy to…",[("Hunt for your email in images","Friction.",False),("Understand offer + contact you",True),("Download malware","Never.",False)])),
 ("Social proof","Trust","concept · lab · check",
 "<p>Testimonials, certs, writeups, speaking, Discord reputation.</p>",
@@ -1267,7 +1273,7 @@ lab("Lab SIEM",[
 "<p>Phish, malware, brute force, account takeover — follow runbooks, then improve them.</p>",
 q("Playbooks help…",[("Replace thinking forever","Still think.",False),("Standardize quality under pressure",True),("Avoid tickets","Still document.",False)])),
 ("Escalation & comms","Clear handoffs","concept · check",
-"<p>Escalate with: what, when, impact, actions taken, ask. Unlock SOC mentors on Discord.</p>"+unlock_box("Unlock SOC study groups and shift tips on Discord."),
+"<p>Escalate with: what, when, impact, actions taken, ask. Get unstuck in Discord.</p>"+unlock_box("SOC study groups and shift tips live in Discord."),
 q("Escalation notes should include…",[("Only 'pls fix'","Incomplete.",False),("Timeline, impact, actions, request",True),("Memes only","No.",False)])),
 ("Shift hygiene","Sustainable ops","concept · lab · check",
 "<p>Hand-off notes, health, avoid alert fatigue via tuning requests.</p>",
@@ -1317,7 +1323,7 @@ lab("Windows/Linux lab",[
 "Export relevant auth logs.",
 ])+q("Persistence checks matter because…",[("Malware always polite","No.",False),("Attackers return after reboot via autoruns",True),("Logs are useless","Logs are core.",False)])),
 ("Comms & legal","Need-to-know","concept · check",
-"<p>Coordinate with legal/PR/leadership. Don't tip off attackers carelessly.</p>"+unlock_box("Unlock IR tabletop scenarios on Discord."),
+"<p>Coordinate with legal/PR/leadership. Don't tip off attackers carelessly.</p>"+unlock_box("IR tabletop scenarios live in Discord."),
 q("Public live-tweeting an active IR…",[("Is best practice","Usually harmful.",False),("Is usually a bad idea",True),("Required by NIST","No.",False)])),
 ("Report & recover","Close the loop","concept · lab · check",
 "<p>Timeline, root cause, blast radius, fixes, monitoring gaps.</p>",
@@ -1411,7 +1417,7 @@ term("det","yaml · detect","Tune a rule","Type noisy then tune",[
 "<p>Partner with IT/App teams for command-line logging, DNS, auth, egress.</p>",
 q("Detection eng without telemetry partners…",[("Is easy","Usually blocked.",False),("Struggles — you need data pipelines",True),("Needs only screenshots","No.",False)])),
 ("Metrics","Did we improve?","concept · check",
-"<p>MTTD/MTTR, FP rate, coverage vs ATT&CK, escaped incidents.</p>"+unlock_box("Unlock detection reviews and rule clinics on Discord."),
+"<p>MTTD/MTTR, FP rate, coverage vs ATT&CK, escaped incidents.</p>"+unlock_box("Detection reviews and rule clinics live in Discord."),
 q("Useful detection metric?",[("Lines of YAML only","Vanity.",False),("FP rate + coverage + response time",True),("Coffee consumed","No.",False)])),
 ("Ship a rule","End-to-end","concept · lab · check",
 "<p>Write → test → document → deploy → monitor → iterate.</p>",
@@ -1457,7 +1463,7 @@ q("GRC success needs…",[("Only the intern","No.",False),("Cross-functional own
 term("grc","bash · grc","Map a control","Type risk then control",[
 ("r",'Risk (<code class="inl">risk</code>)'),
 ("c",'Control (<code class="inl">control</code>)'),
-],"analyst@grc:~$")+unlock_box("Unlock GRC templates and mentor Q&A on Discord.")
+],"analyst@grc:~$")+unlock_box("GRC templates and mentor Q&A live in Discord.")
 +q("Evidence proves…",[("You meant well","Not enough.",False),("Controls operated as designed",True),("Nothing","Audits need evidence.",False)])),
 ("Career paths","Analyst → lead","concept · lab · check",
 "<p>GRC analyst, risk, audit, privacy ops. Portfolio: policies, risk registers, audit workpapers (sanitized).</p>",
@@ -1543,7 +1549,7 @@ q("An ISMS is…",[("A single firewall rule","No.",False),("A managed system of 
 term("comp","bash · compliance","Prep evidence","Type evidence then gap",[
 ("e",'Evidence (<code class="inl">evidence</code>)'),
 ("g",'Gap (<code class="inl">gap</code>)'),
-],"grc@audit:~$")+unlock_box("Unlock framework study groups on Discord.")
+],"grc@audit:~$")+unlock_box("Framework study groups live in Discord.")
 +q("Best audit prep?",[("Night-before screenshots only","Fragile.",False),("Continuous evidence collection",True),("Delete logs","Worse.",False)])),
 ("Privacy overlap","Data obligations","concept · lab · check",
 "<p>GDPR/CCPA-style themes: inventory, lawful basis, rights requests, vendors.</p>",
@@ -1635,7 +1641,7 @@ lab("App sink",[
 "Block dangerous tool args server-side.",
 ])+q("Treat model output as…",[("Fully trusted admin","No.",False),("Untrusted user input",True),("Hardware root of trust","No.",False)])),
 ("RAG & poisoning","Garbage in","concept · check",
-"<p>Poisoned knowledge bases steer answers. Control who can write to corpora.</p>"+unlock_box("Unlock AI security labs and discussions on Discord."),
+"<p>Poisoned knowledge bases steer answers. Control who can write to corpora.</p>"+unlock_box("AI security labs and discussions live in Discord."),
 q("RAG poisoning targets…",[("Only CPUs","No.",False),("The knowledge the model retrieves",True),("Only HDMI cables","No.",False)])),
 ("Secure SDLC for AI","Threat model early","concept · lab · check",
 "<p>Threat-model tools, data flows, evals for safety, human-in-loop for high risk.</p>",
@@ -1680,7 +1686,7 @@ term("agent","lab · agent","Abuse a tool","Type tool then block",[
 "<p>Attack success rate, severity, regression after mitigations.</p>",
 q("After a mitigation you should…",[("Never retest","No.",False),("Rerun the suite for regressions",True),("Delete evals","Lose signal.",False)])),
 ("Reporting AI findings","Actionable","concept · lab · check",
-"<p>Include prompt/doc, model version, tools, impact, recommended guardrails.</p>"+unlock_box("Unlock AI red-team roundtables on Discord.")
+"<p>Include prompt/doc, model version, tools, impact, recommended guardrails.</p>"+unlock_box("AI red-team roundtables live in Discord.")
 +lab("Report",[
 "Write one AI finding report.",
 "Propose 2 guardrails.",
@@ -1732,7 +1738,7 @@ lab("Notes",[
 "Write what would patch/bypass in a crackme (lab).",
 ])+q("A call instruction typically…",[("Deletes the stack forever","No.",False),("Transfers control and sets up return",True),("Only works on Python","No.",False)])),
 ("Safe labs","Don't get owned","concept · check",
-"<p>VMs, snapshots, no shared folders for malware, host isolation.</p>"+unlock_box("Unlock RE study groups and binary labs on Discord."),
+"<p>VMs, snapshots, no shared folders for malware, host isolation.</p>"+unlock_box("RE study groups and binary labs live in Discord."),
 q("Analyzing malware on your daily driver…",[("Is recommended","Dangerous.",False),("Is a bad idea — use isolated labs",True),("Required","No.",False)])),
 ("From RE to bugs","Mindset bridge","concept · lab · check",
 "<p>Look for unchecked copies, bad parsers, trust in inputs — lead-in to exploit modules.</p>",
@@ -1777,7 +1783,7 @@ q("NX/DEP makes…",[("Stack always executable","Opposite.",False),("Data execut
 "<p>Understand conceptually; use lab payloads only. Prefer learning with safe challenges.</p>",
 q("Running shellcode outside labs…",[("Is fine anywhere","Dangerous/illegal if unauthorized.",False),("Requires authorization / lab context",True),("Is required on prod","No.",False)])),
 ("Debugging workflow","Observe control","concept · lab · check",
-"<p>gdb/gef/pwndbg: breakpoints, registers, stepi, examine memory.</p>"+unlock_box("Unlock exploit lab nights on Discord.")
+"<p>gdb/gef/pwndbg: breakpoints, registers, stepi, examine memory.</p>"+unlock_box("Exploit lab nights live in Discord.")
 +lab("gdb",[
 "Break at main.",
 "Inspect registers after crash.",
@@ -1830,7 +1836,7 @@ lab("Triage",[
 "Guess bug class.",
 ])+q("Minimizing a crashing input helps…",[("Make crashes unreproducible","Opposite.",False),("Simplify root-cause analysis",True),("Increase CVSS automatically","No.",False)])),
 ("Sanitizers","ASan/UBSan","concept · check",
-"<p>Build with sanitizers in lab to catch memory errors earlier.</p>"+unlock_box("Unlock fuzzing corpora tips on Discord."),
+"<p>Build with sanitizers in lab to catch memory errors earlier.</p>"+unlock_box("Fuzzing corpora tips live in Discord."),
 q("ASan helps detect…",[("CSS bugs","No.",False),("Many memory safety errors",True),("Only phishing","No.",False)])),
 ("Responsible discovery","What next","concept · check",
 "<p>Crashes in real software → follow disclosure module. Don't exploit in the wild.</p>",
@@ -1871,7 +1877,7 @@ term("rop","bash · rop","Build a tiny chain idea","Type gadgets then chain",[
 "<p>Use-after-free, double free concepts — learn with heap challenges carefully.</p>",
 q("Use-after-free involves…",[("Using memory after free",True),("Only CSS floats","No.",False),("Mandatory in GRC","No.",False)])),
 ("Weaponization ethics","Hard stop","concept · check",
-"<p>Building reliable exploits for unauthorized targets is illegal. Lab/CTF/bug bounty with rules only.</p>"+unlock_box("Advanced exploit clinics unlock on Discord.")
+"<p>Building reliable exploits for unauthorized targets is illegal. Lab/CTF/bug bounty with rules only.</p>"+unlock_box("Advanced exploit clinics live in Discord.")
 +q("Selling exploits for unauthorized use…",[("Is a cool side hustle","Illegal/harmful.",False),("Is illegal and against academy rules",True),("Required for Specialist rank","No.",False)])),
 ("Capstone lab","Prove skill","concept · lab · check",
 "<p>Complete one advanced CTF/exploit challenge and write it up.</p>",
@@ -1910,7 +1916,7 @@ lab("Draft",[
 "<p>CNAs assign CVEs. Not every bug gets one. Don't invent fake CVE IDs.</p>",
 q("Fake CVE numbers on resumes…",[("Are impressive","Fraud.",False),("Are dishonest",True),("Required","No.",False)])),
 ("Timelines & safe harbor","Read the policy","concept · check",
-"<p>Many programs define deadlines & safe harbor — stay inside them.</p>"+unlock_box("Disclosure mentoring unlocks on Discord.")
+"<p>Many programs define deadlines & safe harbor — stay inside them.</p>"+unlock_box("Disclosure mentoring and peer review happen in Discord.")
 +q("Safe harbor typically requires…",[("Ignoring scope","Opposite.",False),("Acting in good faith within program rules",True),("Public shaming first","No.",False)])),
 ("Academy finale","Specialist path","concept · lab · check",
 "<p>You've reached the research endgame. Keep ethical. Jobs & advanced drops live in Discord.</p>",
@@ -1927,33 +1933,33 @@ xp=140,footer="Research · Coordinated disclosure"))
 
 # ---------- COMMUNITY HUB ----------
 results.append(write_page(
-"community/discord-hub.html","community","Unlock Discord — Job Ready HQ",
-"community / discord // gate",
-"This is the funnel: jobs, mentor reviews, gated labs, and study groups unlock on Discord.",
-["→ Jobs","→ Mentors","→ Gated labs"],["4 missions","~30 min","+50 XP"],
+"community/discord-hub.html","community","Academy Discord HQ",
+"community / discord // hq",
+"Lessons live on Whop. Discord is your ops home — chapter drops, daily drills, job lounge, and check-ins.",
+["→ Updates","→ Drills","→ Jobs"],["4 missions","~30 min","+50 XP"],
 pack_missions([
-("Why Discord","The real campus","concept · check",
-"<p>Static pages teach. Discord unlocks hiring, live help, accountability, and member-only drops.</p>"+unlock_box("Tap join to unlock the full academy community."),
-q("In this academy, Discord is…",[("Optional spam","It's the unlock layer.",False),("Where jobs, reviews, and gated content unlock",True),("Only for memes","More than that.",False)])),
-("What unlocks","Member perks","concept · check",
-"<p>Job board, resume reviews, mock interviews, private program tips, live labs, mentor AMAs.</p>",
-q("Job alerts live…",[("Nowhere","In Discord.",False),("In the unlocked Discord community",True),("Only on billboards","No.",False)])),
+("Why Discord","Ops home","concept · check",
+"<p>Whop pages teach the curriculum. Discord keeps you current — feeds, chapter drops, accountability, and career ops.</p>"+unlock_box("Bookmark Discord. That’s where updates land first."),
+q("In this academy, Discord is…",[("Optional spam","It's the ops home.",False),("Your ops home for updates, drills, and career channels",True),("Only for memes","More than that.",False)])),
+("What lives there","Channels & feeds","concept · check",
+"<p>Daily feeds · chapter announcements · track forums · job lounge · check-ins · peer reviews.</p>",
+q("New chapter drops and job alerts show up…",[("Nowhere","In Discord.",False),("In Discord channels first",True),("Only on billboards","No.",False)])),
 ("How to intro","High-signal post","concept · lab · check",
 "<p>Name · timezone · goal · current level · portfolio link · ask.</p>",
 lab("Intro",[
 "Copy your Start Here Discord intro.",
 "Add 2 proof links.",
-"Join via the unlock button and post.",
+"Open Discord and post your intro.",
 ])+q("A strong intro includes…",[("Only 'hi'","Weak.",False),("Goal + level + proof links",True),("Your passwords","Never.",False)])),
 ("Rules of the road","Don't get banned","concept · check",
 "<p>No illegal hacking help, no piracy dumps, no harassment. Lab talk stays ethical.</p>",
 q("Asking for help hacking a real company without auth…",[("Is fine here","Against rules/law.",False),("Is forbidden",True),("Required for XP","No.",False)])),
 ]),
 next_card("../career/resume-portfolio.html","Resume & portfolio","Job gate.")
-+discord_card("Open checkout · unlock now"),
-"csa:community/discord-hub.html","community/discord-hub","discord-unlocked",
++discord_card("Updates · drills · jobs lounge"),
+"csa:community/discord-hub.html","community/discord-hub","discord-hq",
 "{}",
-xp=50,footer="Community · Unlock on Discord",
+xp=50,footer="Community · Open Discord",
 legal="Community rules: authorized learning only. No illegal activity.")
 )
 
@@ -1965,8 +1971,8 @@ new = (
     f'<a class="ncard" href="../career/resume-portfolio.html"><span class="k">Job gate</span>'
     f'<span class="t">Career & jobs</span><span class="d">Resume · interviews · certs.</span></a>'
     f'<a class="ncard dc" href="{DISCORD}" target="_blank" rel="noopener noreferrer">'
-    f'<span class="k">Unlock on Discord</span><span class="t">Jobs & mentors</span>'
-    f'<span class="d">Apply · reviews · gated drops.</span></a>'
+    f'<span class="k">Open Discord</span><span class="t">Academy HQ</span>'
+    f'<span class="d">Updates · drills · jobs lounge</span></a>'
 )
 if old in txt:
     evas.write_text(txt.replace(old, new, 1))
@@ -2005,10 +2011,10 @@ for a,b in replacements:
 # Update Discord CTA copy on start-here
 st = st.replace(
     '<span class="t">Join Discord</span>\n      <span class="d">Post intro · job alerts · get unstuck</span>',
-    '<span class="t">Unlock on Discord</span>\n      <span class="d">Jobs · mentors · gated labs — join to unlock</span>')
+    '<span class="t">Open Discord</span>\n      <span class="d">Updates · drills · jobs lounge</span>')
 st = st.replace(
     'Job Ready:</strong> Core + track missions cleared · resume/portfolio page · Discord apply.',
-    'Job Ready:</strong> Core + track missions cleared · resume/portfolio · unlock Discord & apply.')
+    'Job Ready:</strong> Core + track missions cleared · resume/portfolio · open Discord & apply.')
 sh.write_text(st)
 print("start-here patched")
 
