@@ -70,73 +70,73 @@ var LINKS = {
 
 Settings → Pages → deploy from branch `main`, folder `/ (root)`.
 
-**Base:** `https://prxdee.github.io/cybersecurity-academy/`
+**Base:** `https://prashantdangii.github.io/cybersecurity-academy/`
 
 Paste the module URLs below into Whop Web app embeds. Internal links are relative.
 
 ### Module URLs (Whop embeds)
 
 #### Entry
-- https://prxdee.github.io/cybersecurity-academy/
-- https://prxdee.github.io/cybersecurity-academy/start-here.html
-- https://prxdee.github.io/cybersecurity-academy/community/discord-hub.html
+- https://prashantdangii.github.io/cybersecurity-academy/
+- https://prashantdangii.github.io/cybersecurity-academy/start-here.html
+- https://prashantdangii.github.io/cybersecurity-academy/community/discord-hub.html
 
 #### CyberCore
-- https://prxdee.github.io/cybersecurity-academy/cybercore/networking-fundamentals.html
-- https://prxdee.github.io/cybersecurity-academy/cybercore/linux-command-line-essentials.html
-- https://prxdee.github.io/cybersecurity-academy/cybercore/cybersecurity-essentials.html
-- https://prxdee.github.io/cybersecurity-academy/cybercore/secure-java-development.html
+- https://prashantdangii.github.io/cybersecurity-academy/cybercore/networking-fundamentals.html
+- https://prashantdangii.github.io/cybersecurity-academy/cybercore/linux-command-line-essentials.html
+- https://prashantdangii.github.io/cybersecurity-academy/cybercore/cybersecurity-essentials.html
+- https://prashantdangii.github.io/cybersecurity-academy/cybercore/secure-java-development.html
 
 #### Web Application Security
-- https://prxdee.github.io/cybersecurity-academy/web-application-security/web-attacks.html
-- https://prxdee.github.io/cybersecurity-academy/web-application-security/advanced-web-attacks.html
-- https://prxdee.github.io/cybersecurity-academy/web-application-security/api-security-testing.html
+- https://prashantdangii.github.io/cybersecurity-academy/web-application-security/web-attacks.html
+- https://prashantdangii.github.io/cybersecurity-academy/web-application-security/advanced-web-attacks.html
+- https://prashantdangii.github.io/cybersecurity-academy/web-application-security/api-security-testing.html
 
 #### Penetration Testing
-- https://prxdee.github.io/cybersecurity-academy/penetration-testing/penetration-testing.html
-- https://prxdee.github.io/cybersecurity-academy/penetration-testing/network-penetration-testing.html
-- https://prxdee.github.io/cybersecurity-academy/penetration-testing/active-directory-attacks.html
-- https://prxdee.github.io/cybersecurity-academy/penetration-testing/evasion-techniques-breach.html
+- https://prashantdangii.github.io/cybersecurity-academy/penetration-testing/penetration-testing.html
+- https://prashantdangii.github.io/cybersecurity-academy/penetration-testing/network-penetration-testing.html
+- https://prashantdangii.github.io/cybersecurity-academy/penetration-testing/active-directory-attacks.html
+- https://prashantdangii.github.io/cybersecurity-academy/penetration-testing/evasion-techniques-breach.html
 
 #### Career (Job gate)
-- https://prxdee.github.io/cybersecurity-academy/career/resume-portfolio.html
-- https://prxdee.github.io/cybersecurity-academy/career/interview-prep.html
-- https://prxdee.github.io/cybersecurity-academy/career/certification-roadmap.html
+- https://prashantdangii.github.io/cybersecurity-academy/career/resume-portfolio.html
+- https://prashantdangii.github.io/cybersecurity-academy/career/interview-prep.html
+- https://prashantdangii.github.io/cybersecurity-academy/career/certification-roadmap.html
 
 #### Bug Bounty
-- https://prxdee.github.io/cybersecurity-academy/bug-bounty/bug-bounty-fundamentals.html
-- https://prxdee.github.io/cybersecurity-academy/bug-bounty/recon-asset-discovery.html
-- https://prxdee.github.io/cybersecurity-academy/bug-bounty/writing-reports.html
-- https://prxdee.github.io/cybersecurity-academy/bug-bounty/advanced-bounty-techniques.html
+- https://prashantdangii.github.io/cybersecurity-academy/bug-bounty/bug-bounty-fundamentals.html
+- https://prashantdangii.github.io/cybersecurity-academy/bug-bounty/recon-asset-discovery.html
+- https://prashantdangii.github.io/cybersecurity-academy/bug-bounty/writing-reports.html
+- https://prashantdangii.github.io/cybersecurity-academy/bug-bounty/advanced-bounty-techniques.html
 
 #### Freelancing
-- https://prxdee.github.io/cybersecurity-academy/freelancing/first-client.html
-- https://prxdee.github.io/cybersecurity-academy/freelancing/pricing-contracts.html
-- https://prxdee.github.io/cybersecurity-academy/freelancing/building-portfolio.html
-- https://prxdee.github.io/cybersecurity-academy/freelancing/client-management.html
+- https://prashantdangii.github.io/cybersecurity-academy/freelancing/first-client.html
+- https://prashantdangii.github.io/cybersecurity-academy/freelancing/pricing-contracts.html
+- https://prashantdangii.github.io/cybersecurity-academy/freelancing/building-portfolio.html
+- https://prashantdangii.github.io/cybersecurity-academy/freelancing/client-management.html
 
 #### Defensive Security
-- https://prxdee.github.io/cybersecurity-academy/defensive-security/soc-analyst-fundamentals.html
-- https://prxdee.github.io/cybersecurity-academy/defensive-security/incident-response-dfir.html
-- https://prxdee.github.io/cybersecurity-academy/defensive-security/threat-hunting.html
-- https://prxdee.github.io/cybersecurity-academy/defensive-security/detection-engineering.html
+- https://prashantdangii.github.io/cybersecurity-academy/defensive-security/soc-analyst-fundamentals.html
+- https://prashantdangii.github.io/cybersecurity-academy/defensive-security/incident-response-dfir.html
+- https://prashantdangii.github.io/cybersecurity-academy/defensive-security/threat-hunting.html
+- https://prashantdangii.github.io/cybersecurity-academy/defensive-security/detection-engineering.html
 
 #### GRC
-- https://prxdee.github.io/cybersecurity-academy/grc/grc-fundamentals.html
-- https://prxdee.github.io/cybersecurity-academy/grc/risk-management.html
-- https://prxdee.github.io/cybersecurity-academy/grc/compliance-frameworks.html
-- https://prxdee.github.io/cybersecurity-academy/grc/security-auditing.html
+- https://prashantdangii.github.io/cybersecurity-academy/grc/grc-fundamentals.html
+- https://prashantdangii.github.io/cybersecurity-academy/grc/risk-management.html
+- https://prashantdangii.github.io/cybersecurity-academy/grc/compliance-frameworks.html
+- https://prashantdangii.github.io/cybersecurity-academy/grc/security-auditing.html
 
 #### AI Security
-- https://prxdee.github.io/cybersecurity-academy/ai-security/ai-llm-security-fundamentals.html
-- https://prxdee.github.io/cybersecurity-academy/ai-security/ai-red-teaming.html
+- https://prashantdangii.github.io/cybersecurity-academy/ai-security/ai-llm-security-fundamentals.html
+- https://prashantdangii.github.io/cybersecurity-academy/ai-security/ai-red-teaming.html
 
 #### Exploit Development & Vuln Research
-- https://prxdee.github.io/cybersecurity-academy/vulnerability-research/reverse-engineering-fundamentals.html
-- https://prxdee.github.io/cybersecurity-academy/exploit-development/linux-exploitation.html
-- https://prxdee.github.io/cybersecurity-academy/vulnerability-research/fuzzing-vulnerability-discovery.html
-- https://prxdee.github.io/cybersecurity-academy/exploit-development/binary-exploitation-advanced.html
-- https://prxdee.github.io/cybersecurity-academy/vulnerability-research/cve-research-disclosure.html
+- https://prashantdangii.github.io/cybersecurity-academy/vulnerability-research/reverse-engineering-fundamentals.html
+- https://prashantdangii.github.io/cybersecurity-academy/exploit-development/linux-exploitation.html
+- https://prashantdangii.github.io/cybersecurity-academy/vulnerability-research/fuzzing-vulnerability-discovery.html
+- https://prashantdangii.github.io/cybersecurity-academy/exploit-development/binary-exploitation-advanced.html
+- https://prashantdangii.github.io/cybersecurity-academy/vulnerability-research/cve-research-disclosure.html
 
 ## Content guardrails
 
